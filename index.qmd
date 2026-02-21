@@ -1,0 +1,10 @@
+---
+title: "Miniproject 00"
+---
+My name is **ANA PAULA TAPIA** I am form Mexico and I am studying a *MS in Business Analytics* at Baruch College. 
+```{r}
+#| include: false
+1+1
+```
+--------------
+Last Updated: `r format(Sys.time(), "%A %m %d, %Y at %H:%M%p")`
