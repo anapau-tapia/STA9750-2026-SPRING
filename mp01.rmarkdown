@@ -223,3 +223,4 @@ With all these information, we have many questions to answer to understand bette
 Some websites were consulted to better understand which *Boolean logical operator* was better to use in one of the codes. For one of the questions, where it was needed to define a total of enrollments, I consulted Chatgpt on how to only consider the part of **enrollment_** of each column, without reading the people race indicated in the last part of the title. 
 
 :::
+
