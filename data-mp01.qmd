@@ -125,7 +125,8 @@ acquire_ipeds_data <- function(start_year=2010, end_year=2024){
 
 IPEDS <- acquire_ipeds_data()
 ```
-``{r}
+
+```{r}
 IPEDS <- acquire_ipeds_data()
 print(IPEDS)
 
@@ -208,7 +209,6 @@ IPEDS |>
   arrange(desc(total_grad_state))
 
 ```
-
 With all these information, we have many questions to answer to understand better what this means. 
 
 11,243 institutions were considered for this analysis, and taking **Baruch college** as our first example,it i good to answer the following questions:   
