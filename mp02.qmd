@@ -328,6 +328,7 @@ df_joined |>
        x = "Activity Category",
        y = "Avg Minutes/Day") +
   theme_minimal()
+
 ```
 ### Education employees have the perk to enjoy their summer as any other student. From June to August, they have opportunity to do the activities they like the most. In this graph, we have the results of the ten most popular activities, and the minutes spent on each of them. Having sleeping as the number 1, with more than 225 minutes. Following by that, the three most popular activities are: attending or hosting social, events, attending sports and working, spending between 150 and 175 minutes. The last 6 activities are less common for eduactional employees, spending less than 150 minutes per day.  
 
