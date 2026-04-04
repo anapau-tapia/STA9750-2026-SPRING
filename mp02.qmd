@@ -1,0 +1,350 @@
+---
+title: "Mini-Project 02 - How Do You Do 'You Do You'?"
+author: "anapau-tapia"
+editor:
+    mode: source
+format:
+    html:
+        code-fold: true
+---
+
+
+## Introduction
+
+How do Americans spend their time? 
+Using data from the American Time Use Survey (ATUS), we will analyze, in this mini-project, the activities people across the U.S. like to do.
+
+Here I intent to demonstrate my skills in: 
+
+*Data Synthesis*: Combining disparate ATUS tables into a unified dataset.
+*Visual Insights*: Highlighting trends through publication-quality plots and tables.
+*Technical Rigor*: Transparent R code and documentation of the analytical process.
+
+
+## Data Acquisition and Preparation
+
+```{r}
+library(tidyverse)
+library(glue)
+library(readxl)
+library(httr2)
+
+load_atus_data <- function(file_base = c("resp", "rost", "act")){
+  if(!dir.exists(file.path("data", "mp02"))){
+    dir.create(file.path("data", "mp02"), showWarnings=FALSE, recursive=TRUE)
+  }
+  
+  file_base <- match.arg(file_base)
+  
+  file_name_out <- file.path("data", 
+                             "mp02", 
+                             glue("atus{file_base}_0324.dat"))
+  
+  if(!file.exists(file_name_out)){
+    
+    url_end <- glue("atus{file_base}-0324.zip")
+    
+    temp_zip <- tempfile(fileext=".zip")
+    temp_dir <- tools::file_path_sans_ext(temp_zip)
+    
+    request("https://www.bls.gov") |>
+      req_url_path("tus", "datafiles", url_end) |>
+      req_headers(`User-Agent` = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:143.0) Gecko/20100101 Firefox/143.0") |>
+      req_perform(temp_zip)
+    
+    unzip(temp_zip, exdir = temp_dir)
+    
+    temp_file <- file.path(temp_dir, basename(file_name_out))
+    
+    file.copy(temp_file, file_name_out)
+  }
+  
+   file <- read_csv(file_name_out,
+                     show_col_types = FALSE)
+  
+  res <- switch(file_base,
+         resp = file |> 
+           rename(survey_weight = TUFNWGTP, 
+                  time_alone = TRTALONE, 
+                  survey_year = TUYEAR,
+                  month = TUMONTH,
+                  occ_code = TEIO1OCD,
+                  age = any_of(c("TEAGE", "teage")), 
+                  hefaminc = any_of(c("HEFAMINC", "hefaminc"))) |>
+           mutate(
+            
+             has_children = case_when(
+               TRCHILDNUM > 0 ~ "Yes",
+               TRUE ~ "No"
+             ),
+             
+             marital_status = case_match(TRSPPRES,
+                                         1 ~ "Married",
+                                         2 ~ "Partnered",
+                                         3 ~ "Single",
+                                         .default = "Unknown"),
+            
+             employment_status = case_match(TELFS,
+                                            1 ~ "Employed",
+                                            2 ~ "Employed", # Employed-absent
+                                            3 ~ "Unemployed",
+                                            4 ~ "Unemployed", # Layoff
+                                            5 ~ "Not in Labor force",
+                                            .default = "Unknown"), 
+             
+             is_college_student = case_match(TESCHFT, 1 ~ TRUE, 2 ~ FALSE, .default = FALSE),
+            
+             is_retired = (TELFS == 5)
+           ),
+         rost = file |> 
+           rename(age = any_of(c("TEAGE", "teage"))) |>
+           mutate(sex = case_match(TESEX, 1 ~ "M", 2 ~ "F")),
+         act = file |> 
+           mutate(activity_n_of_day = TUACTIVITY_N, 
+                  time_spent_min = TUACTDUR24, 
+                  start_time = TUSTARTTIM, 
+                  stop_time = TUSTOPTIME, 
+                  level1_code = paste0(TRTIER1P, "0000"), 
+                  level2_code = paste0(TRTIER2P, "00"), 
+                  level3_code = TRCODEP,
+                  # 7. Location of Activity 
+                  location = case_match(TEWHERE,
+                                        1 ~ "Home",
+                                        2 ~ "Work",
+                                        3 ~ "Someone else's home",
+                                        4 ~ "Restaurant/Bar",
+                                        5 ~ "Place of worship",
+                                        6 ~ "Grocery store",
+                                        12 ~ "Public Transit",
+                                        .default = "Other/Travel"))
+  ) 
+  res|> 
+    rename(participant_id = any_of(c("TUCASEID", "tucaseid"))) |>
+    rename_with(tolower) |> 
+    select(matches("[:lower:]", ignore.case = FALSE))
+}
+
+load_atus_activities <- function(){
+  if(!dir.exists(file.path("data", "mp02"))){
+    dir.create(file.path("data", "mp02"), showWarnings=FALSE, recursive=TRUE)
+  }
+  
+  dest_file <- file.path("data",
+                         "mp02",
+                         "atus_activity_codes.csv")
+  
+  if(!file.exists(dest_file)){
+    download.file("https://michael-weylandt.com/STA9750/mini/atus_activity_codes.csv", 
+                  quiet=TRUE, 
+                  destfile=dest_file, 
+                  mode="wb")
+  }
+  
+  read_csv(dest_file, show_col_types = FALSE)
+  
+}
+resp <- load_atus_data("resp")
+act <- load_atus_data("act")
+rost <- load_atus_data("rost")
+
+activities <- load_atus_activities()
+
+
+act |>
+  inner_join(activities, join_by(level3_code == code_level3)) |> 
+  filter(str_detect(task_level3, "Sleeping")) |> 
+  summarize(total_hours = sum(time_spent_min) / 60)
+
+
+resp |>
+  inner_join(rost, join_by(participant_id == participant_id))
+
+resp |>
+  inner_join(rost, join_by(participant_id == participant_id)) |>
+  filter(sex == "F", 
+         survey_year == 2003, 
+         time_alone == 0) |>
+  summarize(total_count = n())
+
+#3.1 Children under 18 living in respondent's home
+resp |> 
+  count(has_children)
+
+#3.2 respondent's Marital status
+resp |> 
+  count(marital_status)
+
+#3.3 Respondent’s employment status
+resp |>
+  group_by(employment_status) |>
+  summarise(total_respondents = n())
+
+#3.4 Location of activity
+act |>
+  count(location) |>
+  arrange(desc(n)) |>
+  
+  head(5)
+
+#3.5 Respondent's enrolled in University
+resp |>
+  summarise(
+    college_student_count = sum(is_college_student, na.rm = TRUE),
+    percent_college = mean(is_college_student, na.rm = TRUE) * 100
+  )
+```
+### 4.1: Respondents answer ATUS #
+```{r}
+total_respondents <- resp |> 
+  distinct(participant_id) |> 
+  nrow()
+```
+since 2003, there have been `r resp|> distinct(participant_id) |> nrow()` different respondents who have answered the ATUS survey.
+
+
+### 4.2: Sports Watching #
+```{r}
+sport_count <- activities |>
+  filter(str_starts(code_level3, "1301")) |> 
+  distinct(code_level3) |>
+  nrow()
+```
+ATUS asked a total of `r sport_count` sports count different sport to american people to know which one they best enjoy to watch.
+
+
+### 4.3: % Retired (Weighted) #
+```{r}
+retirement_stats <- resp |>
+  summarize(
+    percent_retired = weighted.mean(is_retired, w = survey_weight, na.rm = TRUE) * 100
+  )
+```  
+Approximately `r round(retirement_stats$percent_retired, 2)`% of Americans are retired.
+
+
+### 4.4: Average Sleep #
+```{r}
+sleep_per_person <- act |>
+    filter(level2_code == "010100") |>
+    group_by(participant_id) |>
+    summarize(total_sleep_min = sum(time_spent_min, na.rm = TRUE))
+
+
+sleep_stats <- resp |>
+    left_join(sleep_per_person, by = "participant_id") |>
+    mutate(total_sleep_min = replace_na(total_sleep_min, 0)) |>
+    summarize(
+        avg_sleep_hours = weighted.mean(total_sleep_min, w = survey_weight) / 60
+    )
+```  
+On average, Americans spend `r round(sleep_stats$avg_sleep_hours, 2)` hours sleeping per night. 
+
+
+### 4.5: Child Care #
+```{r}
+
+childcare_totals <- act |>
+    filter(str_starts(level2_code, "0301|0302|0303")) |>
+    group_by(participant_id) |>
+    summarize(total_childcare_min = sum(time_spent_min, na.rm = TRUE))
+
+childcare_results <- resp |>
+    filter(has_children == "Yes") |> 
+    left_join(childcare_totals, by = "participant_id") |>
+    mutate(total_childcare_min = replace_na(total_childcare_min, 0)) |>
+    summarize(
+        avg_childcare_hours = weighted.mean(total_childcare_min, w = survey_weight) / 60
+    )
+```
+For Americans with at least one child in the household, the average time spent on childcare activities is `r round(childcare_results$avg_childcare_hours, 2)` hours per day
+
+### 5.1: lawn care #
+```{r}
+library(gt)
+
+df_joined <- act |>
+  left_join(resp, by = "participant_id") |>
+  left_join(activities, by = c("level3_code" = "code_level3"))
+
+df_joined |>
+  filter(level3_code == "020102") |> 
+  group_by(employment_status) |>
+  filter(employment_status %in% c("Employed", "Not in Labor force")) |>
+  summarize(avg_min = weighted.mean(time_spent_min, survey_weight, na.rm = TRUE)) |>
+  gt() |>
+  tab_header(title = "Average Daily Minutes on Lawn Care 🌿",subtitle = "Comparison by Employment Status") |>
+  fmt_number(columns = avg_min, decimals = 1) |>
+  cols_label(employment_status = "Status", avg_min = "Avg. Minutes") |>
+   tab_source_note(md(
+      "According to the results in the table, obtained by an ATUS survey, Unemployed people (Not in Labor Force) spend more time taking care of their lawn by 5.34%.than employed pleope. This could mean that unemployed peole have more free time to mown their lawn and take are of their plants. "))
+
+```
+### 5.2 social/recreational activities #
+```{r}
+df_joined |>
+  filter(str_starts(level3_code, "12")) |> # Socializing, Relaxing, and Leisure
+  group_by(marital_status) |>
+  summarize(avg_leisure_hrs = weighted.mean(time_spent_min, survey_weight) / 60) |>
+  gt() |>
+  tab_header(title = "Time Spent on Social/Recreational activities 🧩 ") |>
+  fmt_number(columns = avg_leisure_hrs, decimals = 2) |>
+  tab_source_note(md(
+      "This table shows how many hours does people spent on social and recreational activities. Depending on thier marital status, people can spend more or less time on those activities. According to these data, Partnered people spend more time on recreational/social activites, followed by single people, and in last place, will be married people "))
+
+```
+
+
+### 5.4 Activities on transit #
+```{r}
+df_joined |>
+  filter(location == "Public Transit") |> 
+  group_by(task_level3) |> 
+  summarize(total_hours = sum(time_spent_min * survey_weight, na.rm = TRUE) / 60) |>
+  slice_max(total_hours, n = 5) |>
+  gt() |>
+  tab_header(title = "Top 5 Activities on Public Transit 🚉 ") |>
+  fmt_number(columns = total_hours, decimals = 0) |>
+  cols_label(task_level3 = "Activity", total_hours = "Estimated Population Hours") |>
+  tab_source_note(md(
+      "With the data obtained from the ATUS survey, people declared that they mainly use the public transportation to go to work "))
+```
+
+
+
+### 6.2 Summer Education Employees #
+```{r}
+df_joined |>
+  # Codes 2200-2340 generally cover Education, Training, and Library Occupations
+  filter(occ_code >= 2200 & occ_code <= 2340) |>
+  filter(month %in% c(6, 7, 8)) |> # June, July, August
+  group_by(task_level2) |>
+  summarize(avg_min = weighted.mean(time_spent_min, survey_weight, na.rm = TRUE)) |>
+  slice_max(avg_min, n = 10) |>
+  ggplot(aes(x = reorder(task_level2, avg_min), y = avg_min, fill = avg_min)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_gradient(low = "skyblue", high = "darkblue") +
+  labs(title = "Summer Activities for Education Professionals ☀️",
+       x = "Activity Category",
+       y = "Avg Minutes/Day") +
+  theme_minimal()
+```
+### Education employees have the perk to enjoy their summer as any other student. From June to August, they have opportunity to do the activities they like the most. In this graph, we have the results of the ten most popular activities, and the minutes spent on each of them. Having sleeping as the number 1, with more than 225 minutes. Following by that, the three most popular activities are: attending or hosting social, events, attending sports and working, spending between 150 and 175 minutes. The last 6 activities are less common for eduactional employees, spending less than 150 minutes per day.  
+
+
+
+
+## Final Insights and Deliverable
+
+My miniproject was running well, until I change one code for task 6 and I started getting errors finding my "age" variable. So suddenly most of my codes for task 6 and 7 were showing 'error' results. I tried many different ways to add the variable, but I continued getting the same error " Column `age` is not found ". I skipped part of task 6 and task 7 to be able to render my work. I will continue working on fixing the error. 
+
+
+::: {.callout-note title="AI Usage Statement" collapse="true"}
+
+Gemini was used to help write the code in this project, but all non-code text was generated without the use of any Generative AI tools. Additionally, ChatGPT was used to provide additional background information on the topic and to brainstorm ideas for the final open-ended prompt.
+
+:::
+
+------------------------------------------------------------------------
+
+This work ©2025 by anapau-tapia was initially prepared as a Mini-Project for STA 9750 at Baruch College. More details about this course can be found at [the course site](https://michael-weylandt.com/STA9750) and instructions for this assignment can be found at [MP #02](https://michael-weylandt.com/STA9750/mini/mini02.html)
