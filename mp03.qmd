@@ -1,0 +1,881 @@
+---
+title: "Mini-Project 03 - Who Goes There? US Internal Migration and Implications for Congressional Reapportionment"
+author: "anapau-tapia"
+editor:
+    mode: source
+format:
+    html:
+        code-fold: true
+---
+
+## Introduction
+The next mini-project focuses on internal migration within the 50 states of U.S. and the District of Colombia, from 2015 to 2024. By collecting state-level and metro areas population data, I will identify historical trends in population movement, specifically highlighting states with the highest rates of in-migration and out-migration over this ten-year period.
+
+The analysis serves to demonstrate my proficiency in data acquisition—including API usage and file parsing—using official Census Bureau migration flows.
+
+
+## Data Acquisition and Preparation
+
+
+```{r}
+#Task 1: State Population and Birth Information: 
+
+library(tidycensus)
+library(tidyverse)
+library(readxl)
+library(stringr)
+library(httr2)
+library(jsonlite)
+library(dplyr)
+library(gt)
+
+# Set tigris cache to TRUE to avoid re-downloading shapefiles
+options(tigris_use_cache = TRUE)
+
+years <- 2015:2024
+
+state_pop_data <- map_dfr(years, function(yr) {
+  if(yr == 2020) return(NULL)
+  
+  get_acs(
+    geography = "state",
+    variables = c(total_pop = "B01003_001"),
+    year = yr,
+    survey = "acs1",
+    geometry = FALSE,     
+    cache_table = TRUE
+  ) |>
+    mutate(Year = yr)
+})
+
+task1_final <- state_pop_data |>
+  select(total_population = estimate, 
+         state_name = NAME, 
+         Year)
+```
+
+ 
+```{r}
+#Task 2: State-to-State Flows 2024:
+
+state_to_state_migration_2024 <- function() {
+    data_dir <- "data/mp03"
+    if (!dir.exists(data_dir)) dir.create(data_dir, recursive = TRUE)
+    
+    url_2024 <- "https://www2.census.gov/programs-surveys/demo/tables/geographic-mobility/2024/state-to-state-migration/State_to_State_Migration_Table_2024_T13.xlsx"
+    dest_file <- file.path(data_dir, "state-to-state-migration-2024.xlsx")
+    
+    if (!file.exists(dest_file)) {
+        download.file(url_2024, dest_file, mode = "wb")
+    }
+
+valid_states <- state.name 
+
+    # 1. MOVERS
+    movers <- read_excel(dest_file, sheet = "Table", skip = 6, col_names = FALSE) |>
+        select(state_current = 1, state_1y = 2, population = 3) |>
+        mutate(population = ifelse(population == "N", "0", population),
+               population = as.integer(population)) |>
+        filter(state_current %in% state.name,
+           state_1y %in% state.name)
+    
+
+    # 2. STAYERS
+    stayers <- read_excel(dest_file, sheet = "Supplemental - Current Res", skip = 4, col_names = FALSE) |>
+        select(state_current = 1, same_house = 2, same_state = 3) |>
+        filter(state_current %in% valid_states) |>
+        mutate(state_1y = state_current,
+               population = as.integer(same_house) + as.integer(same_state)) |>
+        select(state_current, state_1y, population)
+
+    # 3. COMBINE
+    bind_rows(movers, stayers) |>
+        mutate(year_current = 2024, year_1y = 2023)
+}
+
+migration_2024 <- state_to_state_migration_2024()
+
+#Confirm that I only have 50 states 
+length(unique(migration_2024$state_1y))
+
+# Confirm the state names 
+unique(migration_2024$state_current)
+```
+
+ 
+```{r}
+#Task 3: State-to-State Flows 2023:
+
+state_to_state_migration_2023 <- function() {
+    data_dir <- "data/mp03"
+    if (!dir.exists(data_dir)) dir.create(data_dir, recursive = TRUE)
+    
+    url_2023 <- "https://www2.census.gov/programs-surveys/demo/tables/geographic-mobility/2023/state-to-state-migration/State_to_State_Migration_Table_2023_T13.xlsx"
+    dest_file <- file.path(data_dir, "state-to-state-migration-2023.xlsx")
+    
+    if (!file.exists(dest_file)) {
+        download.file(url_2023, dest_file, mode = "wb")
+ }
+
+    # Define State Lists
+    states_only <- state.name
+    states_with_dc <- c(state.name[1:8], "District of Columbia", state.name[9:50])
+    col_names_2023 <- vctrs::vec_interleave(states_with_dc, NA)
+
+    # Stayers (Same House + Same State)
+    stayers <- read_excel(dest_file, skip = 6, col_names = FALSE) |>
+        select(state_current = 1, same_house = 3, same_state = 4) |>
+        filter(state_current %in% states_only) |>
+        mutate(state_1y = state_current,
+               population = as.integer(same_house) + as.integer(same_state)) |>
+        select(state_current, state_1y, population)
+
+    # Movers (State-to-State Matrix)
+    movers <- read_excel(dest_file, range = "J7:DG78", col_names = col_names_2023) |>
+        mutate(state_current = read_excel(dest_file, range = "A7:A78", col_names = FALSE)[[1]]) |>
+        select(state_current, all_of(states_with_dc)) |>
+        pivot_longer(cols = all_of(states_with_dc), 
+                     names_to = "state_1y", 
+                     values_to = "population") |>
+        # Drop DC and ensure I only have 50 states
+        filter(state_current %in% states_only,
+               state_1y %in% states_only,
+               state_current != state_1y) |>
+        mutate(population = ifelse(population == "N", "0", population),
+               population = as.integer(population))
+
+    # Combine and Return
+    bind_rows(movers, stayers) |>
+        mutate(year_current = 2023, year_1y = 2022) |>
+        arrange(state_current, state_1y)
+}
+
+migration_2023 <- state_to_state_migration_2023()
+
+# Check the count
+nrow(migration_2023)
+
+```
+
+## Data Integration and Initial Exploration
+
+```{r}
+#Task 4: Combined State-to-State Flows
+
+state_to_state_migration <- function() {
+    m24 <- state_to_state_migration_2024()
+    m23 <- state_to_state_migration_2023()
+    
+    # Combine the functions vertically
+    bind_rows(m24, m23)
+}
+
+migration_data <- state_to_state_migration()
+
+nrow(migration_data)
+head(migration_data)
+
+```
+
+
+
+```{r}
+#Task 5: Metro-to-Metro Migration Flows
+
+metro_to_metro_migration <- function() {
+
+    data_dir <- "data/mp03"
+    if (!dir.exists(data_dir)) dir.create(data_dir, recursive = TRUE)
+
+    api_url <- "https://api.census.gov/data/2020/acs/flows?get=MOVEDIN,MOVEDOUT,FULL1_NAME,FULL2_NAME&for=metropolitan%20statistical%20area/micropolitan%20statistical%20area:*"
+    dest_file <- file.path(data_dir, "metro-to-metro-migration.json")
+    
+    if (!file.exists(dest_file)) {
+        message("Fetching Metro Data from Census API...")
+        request(api_url) |>
+            req_perform() |>
+            resp_body_string() |>
+            writeLines(dest_file)
+    }
+
+    raw_json <- read_json(dest_file, simplifyVector = TRUE)
+    
+    # Convert matrix to data frame and set headers from the first row
+    metro_raw <- as.data.frame(raw_json[-1, ], stringsAsFactors = FALSE)
+    colnames(metro_raw) <- raw_json[1, ]
+    
+    # Tidy the Data
+    metro_clean <- metro_raw |>
+        as_tibble() |>
+        rename(metro_current = FULL1_NAME,
+               metro_1y = FULL2_NAME,
+               moved_in = MOVEDIN,
+               moved_out = MOVEDOUT) |>
+        mutate(across(c(moved_in, moved_out), as.integer)) |>
+        select(metro_current, metro_1y, moved_in, moved_out) |>
+        filter(!is.na(metro_current), !is.na(metro_1y))
+
+    return(metro_clean)
+}
+
+metro_migration <- metro_to_metro_migration()
+
+metro_migration <- metro_migration |>
+    filter(str_detect(metro_1y, "Metro Area$|Micro Area$")) |>
+    filter(!str_detect(metro_1y, "Outside Metro Area"))
+
+
+# Verify the results
+nrow(metro_migration)
+head(metro_migration)
+```
+
+
+```{r}
+# State's abbreviation 
+pull_state_from_metro <- function(metro_name){
+  str_extract(metro_name, ".*, (\\S{2})[-[:alpha:]]* Metro Area", group=1)
+}
+
+example_metros <- c(
+  "Los Angeles-Long Beach-Anaheim, CA Metro Area", 
+  "Dallas-Fort Worth-Arlington, TX Metro Area", 
+  "Riverside-San Bernardino-Ontario, CA Metro Area", 
+  "Atlanta-Sandy Springs-Alpharetta, GA Metro Area",
+  "Chicago-Naperville-Elgin, IL-IN-WI Metro Area", 
+  "New York-Newark-Jersey City, NY-NJ-PA Metro Area", 
+  "Outside Metro Area within U.S. or Puerto Rico", 
+  "Houston-The Woodlands-Sugar Land, TX Metro Area", 
+  "Washington-Arlington-Alexandria, DC-VA-MD-WV Metro Area", 
+  "San Jose-Sunnyvale-Santa Clara, CA Metro Area"
+)
+
+data.frame(metro = example_metros) |> 
+  mutate(metro_state = pull_state_from_metro(metro)) |> 
+  gt(id="tbl_metro_states") |> 
+  cols_label(metro="Metropolitan Statistical Area", 
+             metro_state="Primary State")
+```
+From this point forward, all graphics, tables, and diagrams will use state abbreviations as defined in this table. For major cities with high migration rates, data has been aggregated at the state level. Since the scope of this project focuses on states rather than individual cities, these cases reflect the total combined data for each state.
+
+
+## Exploratory Analysis
+
+Task 6:
+ **1- Which states have had the highest net population growth rates over the past decade?**
+To answer this question, I generated two distinct tables. Since the latest available data is from 2024 and the Census Bureau provides information in five-year (ACS-5) windows, I created one table for the initial period (2016–2020) and a second table with the most recent available years (2021–2024) to analyze net growth.
+*NOTE: we use Total Net Migration as our primary metric*
+
+A comparison of these tables reveals that Florida and Texas have remained the primary hubs for migration over the last decade, with in-migration more than doubling for both states since 2020. Furthermore, the data strongly suggests that post-2020 migration has shifted significantly toward 'Sunbelt' and 'Mountain West' states, causing shifts in the Top 10 rankings for several other states. 
+
+
+```{r}
+#QUESTION 1 - PART 1
+
+metro_summary_gt <- metro_migration |>
+    mutate(principal_state = str_extract(metro_current, "(?<=, )[A-Z]{2}")) |>
+    group_by(principal_state) |>
+    summarize(
+        Metros_Count = n_distinct(metro_current),
+        Total_In = sum(moved_in, na.rm = TRUE),
+        Total_Out = sum(moved_out, na.rm = TRUE),
+        Net_Migration = Total_In - Total_Out
+    ) |>
+    filter(!is.na(principal_state)) |>
+    arrange(desc(Net_Migration)) |>
+    head(10)
+
+metro_summary_gt |>
+    gt() |>
+    tab_header(
+        title = "Top 10 States by Metro Net Migration (2016-2020)",
+        subtitle = "Based on 2020 ACS 5-Year Flow Data"
+    ) |>
+    cols_label(
+        principal_state = "State",
+        Metros_Count = "Number of Metros",
+        Total_In = "Total Inbound",
+        Total_Out = "Total Outbound",
+        Net_Migration = "Net Growth"
+    ) |>
+  
+    fmt_number(
+        columns = c(Total_In, Total_Out, Net_Migration),
+        decimals = 0,
+        use_seps = TRUE
+    ) |>
+  
+    tab_style(
+        style = list(
+            cell_fill(color = "lightgray", alpha = 0.5),
+            cell_text(weight = "bold")
+        ),
+        locations = cells_body(columns = Net_Migration)
+    ) |>
+    tab_source_note(
+        source_note = "Table 1
+        Source: U.S. Census Bureau ACS Migration Flows"
+    )
+
+
+```
+
+```{r}
+#QUESTION 1 - PART 2
+
+metro_data_raw <- get_estimates(
+    geography = "metropolitan statistical area/micropolitan statistical area",
+    variables = "NETMIG", 
+    year = 2023 
+) |>
+    rename(metro_current = NAME, net_move = value)
+
+# Summarize Internal Migration by Primary State 
+state_summary_internal <- metro_data_raw |>
+    mutate(principal_state = str_extract(metro_current, "(?<=, )[A-Z]{2}")) |>
+    group_by(principal_state) |>
+    summarize(
+        Metros_Count = n_distinct(metro_current),
+        Internal_Net_Growth = sum(net_move, na.rm = TRUE)
+    ) |>
+    filter(!is.na(principal_state)) |>
+    arrange(desc(Internal_Net_Growth)) |>
+    head(10)
+
+# Create the GT Table
+state_summary_internal |>
+    gt() |>
+    tab_header(
+        title = md("Top 10 States by Metro Net Migration (2021-2024)"),
+        subtitle = "Based on 2023 Census Vintages"
+    ) |>
+    cols_label(
+        principal_state = "State",
+        Metros_Count = "Number of Metros",
+        Internal_Net_Growth = "Net Growth"
+    ) |>
+    fmt_number(
+        columns = Internal_Net_Growth,
+        decimals = 0,
+        use_seps = TRUE
+    ) |>
+  
+  tab_style(
+        style = list(
+            cell_fill(color = "lightgray", alpha = 0.5),
+            cell_text(weight = "bold")
+        ),
+        locations = cells_body(columns = Internal_Net_Growth)
+    ) |>
+    tab_source_note(
+        source_note = md("Table 2 
+        Source: [U.S. Census Bureau Population Estimates Program](https://www.census.gov/programs-surveys/popest.html)")
+    )
+```
+ 
+**2- If you meet someone who moved to New York State in the last year, what are the most likely states they moved from? If one of your friends announces they are moving out of the state, where are they most likely to move?**
+
+According to 2024 ACS data, individuals moving to New York State are most likely relocating from New Jersey, California, or Florida. While motivations vary—ranging from new career opportunities and educational pursuits to economic factors or a desire for a shorter commute—the data suggests that in-migrants predominantly originate from neighboring states or major population hubs.
+
+Conversely, those moving out of New York State are most frequently heading to New Jersey, Florida, or Pennsylvania. While their reasons for leaving may differ from those of people moving in, there is a clear overlap in the primary exchange partners, indicating a consistent and high-volume flow of residents between these specific regions.
+
+
+```{r}
+
+library(tidytext)
+
+# Prepare Inbound Data (To NYS)
+inbound <- migration_2024 |>
+    filter(state_current == "New York", 
+           state_1y != "New York") |>
+    mutate(flow_type = "Moving Into NYS", 
+           partner_state = state_1y) |>
+    slice_max(population, n = 10)
+
+# Prepare Outbound Data (From NYS)
+outbound <- migration_2024 |>
+    filter(state_1y == "New York", 
+           state_current != "New York") |>
+    mutate(flow_type = "Moving Out of NYS", 
+           partner_state = state_current) |>
+    slice_max(population, n = 10)
+
+# Combine and Plot
+bind_rows(inbound, outbound) |>
+    ggplot(aes(x = reorder_within(partner_state, population, flow_type), 
+               y = population, 
+               fill = flow_type)) +
+    geom_col(show.legend = FALSE) +
+    facet_wrap(~flow_type, scales = "free") +
+    scale_x_reordered() + 
+    coord_flip() +
+    labs(title = "New York State Migration Patterns (2024)",
+         subtitle = "Top 10 exchange partners for people moving in and out of the state",
+         x = "Partner State",
+         y = "Number of Movers",
+         caption = "Source: US Census Bureau ACS-1 Migration Flows (2024)") +
+    scale_fill_manual(values = c("Moving Into NYS" = "#2c7fb8", 
+                                 "Moving Out of NYS" = "#feb24c")) +
+    theme_minimal()
+
+```
+
+
+**3 - If you meet someone who moved to New York City in the last year, what are the most likely metro areas they moved from? If one of your friends announces they are moving out of the city, where are they most likely to move?** 
+
+In both cases, Philadelphia-Camden-Wilmington ranks as the top metropolitan area for both in-migration and out-migration relative to New York City. The data shows a significant gap of over 10,000 migrants between this top-ranked area and the second-place position in the graphic. This high volume of movement is likely due to the close geographic proximity of these neighboring metropolitan regions
+```{r}
+
+move_row_to_colnames <- function(X, row = 1) {
+    X <- as_tibble(X)
+    Xrow <- X[row, ]
+    X <- X[-row, ]
+    colnames(X) <- Xrow
+    readr::type_convert(X)
+}
+
+# Extract the state abbreviation from a Metro Area name
+pull_state_from_metro <- function(metro_name) {
+    str_extract(metro_name, ".*, (\\S{2})[-[:alpha:]]* Metro Area", group = 1)
+}
+
+metro_to_metro_migration <- function() {
+    data_dir <- "data/mp03"
+    if (!dir.exists(data_dir)) dir.create(data_dir, recursive = TRUE)
+    
+    url <- "https://api.census.gov/data/2020/acs/flows?get=MOVEDIN,MOVEDOUT,FULL1_NAME,FULL2_NAME&for=metropolitan%20statistical%20area/micropolitan%20statistical%20area:*"
+    dest_file <- file.path(data_dir, "metro_migration_2020.json")
+
+    if (!file.exists(dest_file)) {
+        download.file(url, dest_file, mode = "wb")
+    }
+    
+    read_json(dest_file, simplifyVector = TRUE) |>
+        move_row_to_colnames() |>
+        rename(METRO_NAME = FULL1_NAME, 
+               PARTNER_NAME = FULL2_NAME) |>
+        mutate(STATE = pull_state_from_metro(METRO_NAME),
+               PARTNER_STATE = pull_state_from_metro(PARTNER_NAME)) |>
+        mutate(MOVEDIN = as.integer(MOVEDIN),
+               MOVEDOUT = as.integer(MOVEDOUT)) |>
+        # Replace NAs with 0 for calculation safety
+        mutate(across(c(MOVEDIN, MOVEDOUT), ~replace_na(.x, 0)))
+}
+
+metro_flows <- metro_to_metro_migration()
+```
+
+```{r}
+library(scales)
+
+nyc_name <- "New York-Newark-Jersey City, NY-NJ-PA Metro Area"
+valid_regions <- c(state.name, state.abb, "District of Columbia", "DC")
+
+plot_data <- metro_flows |>
+    filter(METRO_NAME == nyc_name, 
+           PARTNER_NAME != nyc_name) |>
+    filter(PARTNER_STATE %in% valid_regions) |>
+    rename(Inbound = MOVEDIN, Outbound = MOVEDOUT) |>
+    pivot_longer(cols = c(Inbound, Outbound), 
+                 names_to = "flow_type", 
+                 values_to = "movers") |>
+    group_by(flow_type) |>
+    slice_max(movers, n = 10, with_ties = FALSE) |>
+    ungroup() |>
+    mutate(
+        partner_clean = str_remove(PARTNER_NAME, " Metro Area"),
+        partner_wrapped = str_wrap(partner_clean, width = 20)
+    )
+
+# Execution with readable axis fixes
+if(nrow(plot_data) > 0) {
+    ggplot(plot_data, aes(x = reorder_within(partner_wrapped, movers, flow_type), 
+                          y = movers, 
+                          fill = flow_type)) +
+        geom_col(show.legend = FALSE) +
+        facet_wrap(~flow_type, scales = "free") +
+        scale_x_reordered() +
+        # Use 'K' labels and 'expand' to stop numbers from overlapping
+        scale_y_continuous(labels = label_number(scale_cut = cut_short_scale()),
+                           expand = expansion(mult = c(0, 0.2))) + 
+        coord_flip() +
+        labs(title = "NYC Metro Area: Top Domestic Migration Partners",
+             x = "Partner Metro Area",
+             y = "Number of Movers",
+             caption = "Source: US Census Bureau API / STA 9750 MP03") +
+        scale_fill_manual(values = c("Inbound" = "#003584", "Outbound" = "#f2c100")) +
+        theme_minimal() +
+        theme(axis.text.y = element_text(size = 8, lineheight = 0.8),
+              axis.text.x = element_text(size = 9),
+              panel.spacing = unit(2, "lines"),
+              strip.text = element_text(face = "bold"))
+} else {
+    print("Warning: No data found for the specified filters. Check your 'PARTNER_STATE' values.")
+}
+```
+**4- Which states have had the highest amounts of in-migration and out-migration? Furthermore, which states have had the highest amount of net migration?**
+
+In this question, we are focusing again in the migration between states, but this time, across the country. To answer this, I generated two tables summarizing the 2024 migration data.
+
+Texas recorded the highest volume of in-migration in the country, with a total of 553,869 people relocating to the state. Conversely, California experienced the highest level of out-migration, with 656,646 residents departing during the same period.
+
+While both states show high levels of movement, an analysis of the net migration column reveals that states in the 'losing residents' category often exhibit higher overall rates of churn. These trends may be influenced by the total population size of these states, as well as seasonal shifts in the labor market. 
+
+
+```{r}
+# Calculate state-level net migration
+state_net_growth <- migration_2024 |>
+    group_by(state_current) |>
+    summarize(
+        inbound = sum(population[state_current != state_1y], na.rm = TRUE),
+        # state_current / state_1y, 
+        outbound = sum(migration_2024$population[migration_2024$state_1y == first(state_current) & 
+                                               migration_2024$state_current != migration_2024$state_1y], na.rm = TRUE),
+        net_change = inbound - outbound
+    ) |>
+    arrange(desc(net_change))
+
+# Create top 5 gaining residents Table 
+state_net_growth |>
+    head(5) |>
+    gt() |>
+    tab_header(title = "States Gaining the Most Residents (2024)") |>
+    fmt_number(columns = everything(), decimals = 0)
+
+```
+
+```{r}
+#Create top 5 loosing residents table 
+
+state_net_growth |>
+    arrange(net_change) |>
+    head(5) |>
+    gt() |>
+    tab_header(title = "States Losing the Most Residents (2024)") |>
+    fmt_number(columns = everything(), decimals = 0)
+
+```
+
+To provide a clearer visual representation of these migration trends, I generated a series of choropleth maps of the United States. In these visualizations, states shaded in darker blue indicate high volumes of migration movement. Conversely, states shown in faded blue or yellow represent lower migration activity. 
+```{r}
+library(ggplot2)
+library(tidyr)
+library(tigris)
+library(sf)
+library(scales)
+
+# Get US State Boundaries & Shift Geometry
+us_states <- states(cb = TRUE, resolution = "20m") |>
+    filter(!STUSPS %in% c("AS", "GU", "MP", "PR", "VI")) |>
+    shift_geometry()
+
+# 1. Calculate Total In-Migration (Sum by current state)
+total_in <- migration_2024 |>
+    filter(state_current != state_1y) |>
+    group_by(state_current) |>
+    summarize(total_inbound = sum(population, na.rm = TRUE)) |>
+    rename(state = state_current)
+
+# 2. Calculate Total Out-Migration (Sum by previous state)
+total_out <- migration_2024 |>
+    filter(state_current != state_1y) |>
+    group_by(state_1y) |>
+    summarize(total_outbound = sum(population, na.rm = TRUE)) |>
+    rename(state = state_1y)
+
+state_migration_summary <- total_in |>
+    left_join(total_out, by = "state") |>
+    mutate(net_migration = total_inbound - total_outbound)
+
+# Pivot to Long Format for Faceting
+map_data_long <- us_states |>
+    left_join(state_migration_summary, by = c("NAME" = "state")) |>
+    pivot_longer(
+        cols = c(total_inbound, total_outbound, net_migration),
+        names_to = "metric",
+        values_to = "value"
+    ) |>
+    # Clean up names for the map titles
+    mutate(metric = case_when(
+        metric == "total_inbound" ~ "Total In-Migration",
+        metric == "total_outbound" ~ "Total Out-Migration",
+        metric == "net_migration" ~ "Net Migration"
+    ))
+
+# Faceted Map
+ggplot(map_data_long) +
+    geom_sf(aes(fill = value), color = "white", size = 0.1) +
+    facet_wrap(~metric, ncol = 1) + # Stacks the three maps vertically
+    scale_fill_gradient2(
+        low = "#d73027", 
+        mid = "#ffffbf", 
+        high = "#4575b4", 
+        midpoint = 0,
+        labels = label_number(scale_cut = cut_short_scale())
+    ) +
+    labs(
+        title = "US Internal Migration Landscape (2024)",
+        subtitle = "Analysis of Inbound, Outbound, and Net Flows",
+        fill = "Movers",
+        caption = "Source: 2024 State-to-State Migration Data"
+    ) +
+    theme_void() +
+    theme(
+        strip.text = element_text(face = "bold", size = 12),
+        legend.position = "right"
+    )
+
+```
+
+**5- Which metro areas have had the highest amounts of total in-migration and out-migration? Furthermore, which metro areas have had the highest amount of net migration?**
+
+In this section, we shift our analysis to metropolitan-level migration patterns across the United States. While these results share similarities with the previous state-level findings, the rankings change when we group data by specific metropolitan hubs rather than state boundaries.
+
+According to the summary tables, the New York-Newark-Jersey City (NY-NJ-PA) metro area remains a primary migration hub with migration loss, with significant churn. However, metro areas like Mobile, AL, may see a bigger impact in the migrations results, due to their population quantity. 
+
+Conversely, in the net gain analysis, the Phoenix-Mesa-Chandler, AZ metro area emerges as the top destination for in-movers. The data indicates a consistent net growth pattern across the top-performing metros, suggesting that the rankings closely reflect the actual areas of high population expansion during this census period. 
+
+The true impact comes from the Net Migration column (Inbound minus Outbound), because even though some states have a higher number of people migrating, comparing their total population, that does not represent a significant change, but analyzing place with a smaller population number, their **net changes** can represent a huge impact in their population,  which determines whether these hubs are helping their respective states grow or shrink
+
+```{r}
+
+valid_states <- c(state.name, state.abb, "District of Columbia", "DC")
+
+metro_net_summary <- metro_flows |>
+    filter(str_detect(METRO_NAME, paste(valid_states, collapse="|"))) |>
+    filter(!str_detect(METRO_NAME, "PR")) |>
+    group_by(METRO_NAME) |>
+    summarize(
+        inbound = sum(MOVEDIN, na.rm = TRUE),
+        outbound = sum(MOVEDOUT, na.rm = TRUE)
+    ) |>
+    mutate(net_change = inbound - outbound) |>
+    mutate(METRO_NAME = str_remove(METRO_NAME, " Metro Area"))
+
+# 3. Generate Table for Metro Areas with highest net loss
+metro_net_summary |>
+    arrange(net_change) |>
+    head(10) |>
+    gt() |>
+    tab_header(
+        title = "Metropolitan Areas with Largest Net Migration Loss") |>
+    cols_label(
+        METRO_NAME = "Metropolitan Area",
+        inbound = "Total Inbound",
+        outbound = "Total Outbound",
+        net_change = "Net Change"
+    ) |>
+    fmt_number(columns = c(inbound, outbound, net_change), decimals = 0)
+
+```
+
+
+```{r}
+# Table for Metro Areas with highest net gain
+metro_net_summary |>
+    arrange(desc(net_change)) |>
+    head(10) |>
+    gt() |>
+    tab_header(
+        title = "Metropolitan Areas with Largest Net Migration Gain",
+        subtitle = "Top destinations for internal US migration"
+    ) |>
+    cols_label(
+        METRO_NAME = "Metropolitan Area",
+        inbound = "Inbound",
+        outbound = "Outbound",
+        net_change = "Net Change"
+    ) |>
+    fmt_number(columns = c(inbound, outbound, net_change), decimals = 0)
+
+```
+
+
+**6- Which states have the highest fraction of residents who lived there last year?**
+The results to this question are quite impressive. When compared to the raw migration figures discussed previously, we see familiar state names appearing at the top of the list, all maintaining a retention rate above 95%. 
+
+It is particularly noteworthy that California ranks as the top state for retention, despite also leading the nation in total migration loss. This apparent contradiction is explained by the state's massive population base; even high volumes of arrivals or departures represent only a 'small slice of the pie' relative to the total number of residents who remained. This trend holds true for the other highly-ranked states, which all share the common characteristic of having very large populations.
+
+```{r}
+
+state_retention <- migration_data |>
+    filter(year_current == 2024) |>
+    group_by(state_current) |>
+    mutate(retention_fraction = sum(population[state_1y == state_current], na.rm = TRUE) / sum(population, na.rm = TRUE)) |>
+    filter(state_1y == state_current) |>
+    ungroup() |>
+    rename(state = state_current) |>
+    filter(retention_fraction > 0)
+
+
+# Graphic
+if(nrow(state_retention) > 0) {
+    state_retention |>
+    # Take top 10 and bottom 10
+    filter(rank(desc(retention_fraction)) <= 10 | rank(retention_fraction) <= 10) |>
+    ggplot(aes(x = reorder(state, retention_fraction), y = retention_fraction, fill = retention_fraction)) +
+    geom_col() +
+    coord_flip() +
+    scale_y_continuous(labels = label_percent(), limits = c(0, 1)) +
+    scale_fill_viridis_c(option = "mako", direction = -1, labels = label_percent()) +
+    labs(
+        title = "State Retention Rates: Who Stayed Put in 2024?",
+        subtitle = "Highest vs. Lowest Fraction of Residents Living in the Same State as Last Year",
+        x = "State",
+        y = "Percentage of Population Retained",
+        caption = "Source: 2024 State-to-State Migration Data"
+    ) +
+    theme_minimal()
+} else {
+    print("ERROR: No data matches the retention criteria. Check your Task 2/3 state names.")
+}
+```
+
+For the following three questions, I have selected Illinois as my focal state. Given that Illinois is a high-population state anchored by a major metropolitan hub like Chicago, I am interested in analyzing the migration trends within this region to better understand its demographic movement. 
+
+**8- Which state had the highest amount of migration into Illinois? Of the people who moved out of Illinois, what was the most popular destination state?**
+As illustrated in the map, Indiana is the leading destination for residents moving out of Illinois, with a total of 25,727 departures recorded in 2024. The geographic proximity between these states might be the primary driver of this migration. 
+Conversely, Texas serves as the top source of new residents moving into Illinois, with 18,189 individuals reported during the same period. Despite the significant distance between these regions, this inbound flow suggests that Illinois remains a destination for residents from large Southern hubs.
+
+
+```{r}
+# Dual-direction summary for the map
+il_inbound <- migration_data |>
+    filter(year_current == 2024, state_current == "Illinois", state_1y != "Illinois") |>
+    slice_max(population, n = 1) |>
+    transmute(Partner_State = state_1y, population = population, Type = "Top Source (Inbound)")
+
+il_outbound <- migration_data |>
+    filter(year_current == 2024, state_1y == "Illinois", state_current != "Illinois") |>
+    slice_max(population, n = 1) |>
+    transmute(Partner_State = state_current, population = population, Type = "Top Destination (Outbound)")
+
+il_summary <- bind_rows(il_inbound, il_outbound)
+
+# Join with the map
+map_data <- us_states |> # Changed from us_map to us_states
+    left_join(il_summary, by = c("NAME" = "Partner_State"))
+
+# Create the Map
+ggplot(map_data) +
+    geom_sf(aes(fill = population > 0), color = "white", size = 0.2, show.legend = FALSE) +
+    geom_sf_text(
+        data = filter(map_data, population > 0),
+        aes(label = label_comma()(population)),
+        size = 3,
+        fontface = "bold",
+        nudge_y = -0.5
+    ) +
+    facet_wrap(~Type) +
+    scale_fill_manual(values = c("FALSE" = "grey92", "TRUE" = "#6baed6")) +
+    labs(
+        title = "Illinois' Top Migration Partners",
+        subtitle = "States with the highest migration volume in 2024",
+        caption = "Source: 2024 Census State-to-State Migration"
+    ) +
+    theme_void() +
+    theme(strip.text = element_text(face = "bold", size = 12))
+```
+**9- What is the largest metropolitan area in your state?**
+Chicago-Naperville-Elgin, *IL-IN-WI* is the largest metro area in Illinois. 
+
+```{r}
+
+il_state <- states(cb = TRUE) |> 
+  filter(NAME == "Illinois")
+
+# Get all US Metropolitan Areas
+all_cbsas <- core_based_statistical_areas(cb = TRUE)
+
+# Filter for MSAs that touch Illinois
+il_metros <- all_cbsas |>
+  st_filter(il_state, .predicate = st_intersects) |>
+  filter(LSAD == "M1")
+
+# 4. Create the Map
+ggplot() +
+  geom_sf(data = il_state, fill = "gray", color = "white") +
+  geom_sf(data = il_metros, fill = "yellow", color = "black", alpha = 0.6) +
+  theme_void() +
+  labs(title = "Illinois Metropolitan Statistical Areas (MSAs)")
+
+```
+**10- Are there any metro areas that have a particularly high connection to your state’s largest metro?**
+
+```{r}
+
+chicago_name <- "Chicago-Naperville-Elgin, IL-IN-WI Metro Area"
+us_states_pattern <- paste0(", (", paste(state.abb, collapse="|"), "|DC)")
+
+# Calculate Total Inbound/Outbound Flows for Percentages
+total_inbound_chicago <- metro_flows |>
+    filter(if_any(3, ~ . == chicago_name)) |>
+    summarize(total = sum(MOVEDIN, na.rm = TRUE)) |>
+    pull(total)
+
+total_outbound_chicago <- metro_flows |>
+    filter(if_any(4, ~ . == chicago_name)) |>
+    summarize(total = sum(MOVEDOUT, na.rm = TRUE)) |>
+    pull(total)
+
+# Identify High-Connection Partners (Top 5 by Share)
+high_connections <- bind_rows(
+    # Top Inbound Shares
+    metro_flows |>
+        filter(if_any(3, ~ . == chicago_name)) |>
+        filter(!if_any(4, ~ . == chicago_name)) |>
+        filter(if_any(4, ~ grepl(us_states_pattern, .))) |>
+        mutate(
+            Type = "Inbound to Chicago",
+            Partner = PARTNER_NAME,
+            Share = MOVEDIN / total_inbound_chicago
+        ) |>
+        slice_max(Share, n = 5) |>
+        select(Type, Partner, Share),
+    
+    # Top Outbound Shares
+    metro_flows |>
+        filter(if_any(4, ~ . == chicago_name)) |>
+        filter(!if_any(3, ~ . == chicago_name)) |>
+        filter(if_any(3, ~ grepl(us_states_pattern, .))) |>
+        mutate(
+            Type = "Outbound from Chicago",
+            Partner = METRO_NAME,
+            Share = MOVEDOUT / total_outbound_chicago
+        ) |>
+        slice_max(Share, n = 5) |>
+        select(Type, Partner, Share)
+)
+
+# Table
+high_connections |>
+    gt() |>
+    tab_header(
+        title = "High-Intensity Migration Connections: Chicago Metro",
+        subtitle = "Identifying partner metros with the largest share of total migration"
+    ) |>
+    fmt_percent(columns = Share, decimals = 1)
+
+```
+
+
+## Final Insights and Deliverable
+
+Code related to the final deliverable of the assignment goes here. 
+
+
+
+
+::: {.callout-note title="AI Usage Statement" collapse="true"}
+
+Gemini was used to help write the code in this project, but all non-code text was generated without the use of any Generative AI tools. Additionally, Gemini was used to provide additional background information on the topic and to brainstorm ideas for the final open-ended prompt.
+
+:::
+
+------------------------------------------------------------------------
+
+This work ©2025 by anapau-tapia was initially prepared as a Mini-Project for
+STA 9750 at Baruch College. More details about this course can be found at
+[the course site](https://michael-weylandt.com/STA9750) and instructions for
+this assignment can be found at 
+[MP #03](https://michael-weylandt.com/STA9750/mini/mini03.html)
