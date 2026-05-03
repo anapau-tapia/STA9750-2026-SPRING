@@ -218,32 +218,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">file.copy</span>(temp_file, file_name_out)</span>
 <span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>   file <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(file_name_out,</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>       file <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(file_name_out,</span>
 <span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>                     <span class="at">show_col_types =</span> <span class="cn">FALSE</span>,</span>
 <span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>                     <span class="at">n_max=</span><span class="dv">50000</span>)</span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>  <span class="cf">switch</span>(file_base,</span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>         <span class="at">resp =</span> file <span class="sc">|&gt;</span> </span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>           <span class="fu">rename</span>(<span class="at">survey_weight =</span> TUFNWGTP, </span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>                  <span class="at">time_alone =</span> TRTALONE, </span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>                  <span class="at">survey_year =</span> TUYEAR,</span>
-<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>                  <span class="at">month =</span> TUMONTH,</span>
-<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>                  <span class="at">occ_code =</span> TEIO1OCD,</span>
-<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>                  <span class="at">hefaminc =</span> <span class="fu">any_of</span>(<span class="fu">c</span>(<span class="st">"HEFAMINC"</span>, <span class="st">"hefaminc"</span>)),</span>
-<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>                  <span class="at">age =</span> <span class="fu">any_of</span>(<span class="fu">c</span>(<span class="st">"TEAGE"</span>, <span class="st">"teage"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>  res <span class="ot">&lt;-</span> <span class="cf">switch</span>(file_base,</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>         <span class="at">resp =</span> file <span class="sc">|&gt;</span> </span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>           <span class="fu">rename</span>(<span class="at">survey_weight =</span> TUFNWGTP, </span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>                  <span class="at">time_alone =</span> TRTALONE, </span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>                  <span class="at">survey_year =</span> TUYEAR,</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>                  <span class="at">month =</span> TUMONTH,</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>                  <span class="at">occ_code =</span> TEIO1OCD,</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>                  <span class="at">hefaminc =</span> <span class="fu">any_of</span>(<span class="fu">c</span>(<span class="st">"HEFAMINC"</span>, <span class="st">"hefaminc"</span>))) <span class="sc">|&gt;</span></span>
 <span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>           <span class="fu">mutate</span>(</span>
-<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>             <span class="co"># 1. Children under 18 in home</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>            </span>
 <span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>             <span class="at">has_children =</span> <span class="fu">case_when</span>(</span>
 <span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>               TRCHILDNUM <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">~</span> <span class="st">"Yes"</span>,</span>
 <span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>               <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"No"</span></span>
 <span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>             ),</span>
-<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>             <span class="co"># 2. Marital Status</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>             </span>
 <span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>             <span class="at">marital_status =</span> <span class="fu">case_match</span>(TRSPPRES,</span>
 <span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>                                         <span class="dv">1</span> <span class="sc">~</span> <span class="st">"Married"</span>,</span>
 <span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>                                         <span class="dv">2</span> <span class="sc">~</span> <span class="st">"Partnered"</span>,</span>
 <span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>                                         <span class="dv">3</span> <span class="sc">~</span> <span class="st">"Single"</span>,</span>
 <span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">.default =</span> <span class="st">"Unknown"</span>),</span>
-<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>             <span class="co"># 3. Employment Status</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>            </span>
 <span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>             <span class="at">employment_status =</span> <span class="fu">case_match</span>(TELFS,</span>
 <span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>                                            <span class="dv">1</span> <span class="sc">~</span> <span class="st">"Employed"</span>,</span>
 <span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>                                            <span class="dv">2</span> <span class="sc">~</span> <span class="st">"Employed"</span>, <span class="co"># Employed-absent</span></span>
@@ -251,57 +251,59 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>                                            <span class="dv">4</span> <span class="sc">~</span> <span class="st">"Unemployed"</span>, <span class="co"># Layoff</span></span>
 <span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>                                            <span class="dv">5</span> <span class="sc">~</span> <span class="st">"Not in Labor force"</span>,</span>
 <span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>                                            <span class="at">.default =</span> <span class="st">"Unknown"</span>), </span>
-<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>             <span class="co"># 5. College Enrollment Logic</span></span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>             </span>
 <span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>             <span class="at">is_college_student =</span> <span class="fu">case_match</span>(TESCHFT, <span class="dv">1</span> <span class="sc">~</span> <span class="cn">TRUE</span>, <span class="dv">2</span> <span class="sc">~</span> <span class="cn">FALSE</span>, <span class="at">.default =</span> <span class="cn">FALSE</span>),</span>
-<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>             <span class="co"># 6. is retired</span></span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>            </span>
 <span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>             <span class="at">is_retired =</span> (TELFS <span class="sc">==</span> <span class="dv">5</span>)</span>
 <span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a>           ),</span>
 <span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a>         <span class="at">rost =</span> file <span class="sc">|&gt;</span> </span>
-<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>           <span class="fu">mutate</span>(<span class="at">sex =</span> <span class="fu">case_match</span>(TESEX, <span class="dv">1</span> <span class="sc">~</span> <span class="st">"M"</span>, <span class="dv">2</span> <span class="sc">~</span> <span class="st">"F"</span>)),</span>
-<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>         <span class="at">act =</span> file <span class="sc">|&gt;</span> </span>
-<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>           <span class="fu">mutate</span>(<span class="at">activity_n_of_day =</span> TUACTIVITY_N, </span>
-<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>                  <span class="at">time_spent_min =</span> TUACTDUR24, </span>
-<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>                  <span class="at">start_time =</span> TUSTARTTIM, </span>
-<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>                  <span class="at">stop_time =</span> TUSTOPTIME, </span>
-<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>                  <span class="at">level1_code =</span> <span class="fu">paste0</span>(TRTIER1P, <span class="st">"0000"</span>), </span>
-<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>                  <span class="at">level2_code =</span> <span class="fu">paste0</span>(TRTIER2P, <span class="st">"00"</span>), </span>
-<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>                  <span class="at">level3_code =</span> TRCODEP,</span>
-<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>                  <span class="co"># 7. Location of Activity </span></span>
-<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>                  <span class="at">location =</span> <span class="fu">case_match</span>(TEWHERE,</span>
-<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>                                        <span class="dv">1</span> <span class="sc">~</span> <span class="st">"Home"</span>,</span>
-<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>                                        <span class="dv">2</span> <span class="sc">~</span> <span class="st">"Work"</span>,</span>
-<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>                                        <span class="dv">3</span> <span class="sc">~</span> <span class="st">"Someone else's home"</span>,</span>
-<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>                                        <span class="dv">4</span> <span class="sc">~</span> <span class="st">"Restaurant/Bar"</span>,</span>
-<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>                                        <span class="dv">5</span> <span class="sc">~</span> <span class="st">"Place of worship"</span>,</span>
-<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a>                                        <span class="dv">6</span> <span class="sc">~</span> <span class="st">"Grocery store"</span>,</span>
-<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a>                                        <span class="dv">12</span> <span class="sc">~</span> <span class="st">"Public Transit"</span>,</span>
-<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">.default =</span> <span class="st">"Other/Travel"</span>))</span>
-<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
-<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="at">participant_id =</span> TUCASEID) <span class="sc">|&gt;</span></span>
-<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="fu">matches</span>(<span class="st">"[:lower:]"</span>, </span>
-<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a>                   <span class="at">ignore.case=</span><span class="cn">FALSE</span>))</span>
-<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a>load_atus_activities <span class="ot">&lt;-</span> <span class="cf">function</span>(){</span>
-<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">dir.exists</span>(<span class="fu">file.path</span>(<span class="st">"data"</span>, <span class="st">"mp02"</span>))){</span>
-<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dir.create</span>(<span class="fu">file.path</span>(<span class="st">"data"</span>, <span class="st">"mp02"</span>), <span class="at">showWarnings=</span><span class="cn">FALSE</span>, <span class="at">recursive=</span><span class="cn">TRUE</span>)</span>
-<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>  dest_file <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="st">"data"</span>,</span>
-<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"mp02"</span>,</span>
-<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"atus_activity_codes.csv"</span>)</span>
-<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(dest_file)){</span>
-<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a>    <span class="fu">download.file</span>(<span class="st">"https://michael-weylandt.com/STA9750/mini/atus_activity_codes.csv"</span>, </span>
-<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a>                  <span class="at">quiet=</span><span class="cn">TRUE</span>, </span>
-<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a>                  <span class="at">destfile=</span>dest_file, </span>
-<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a>                  <span class="at">mode=</span><span class="st">"wb"</span>)</span>
-<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_csv</span>(dest_file, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>           <span class="fu">rename</span>(<span class="at">age =</span> <span class="fu">any_of</span>(<span class="fu">c</span>(<span class="st">"TEAGE"</span>, <span class="st">"teage"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>           <span class="fu">mutate</span>(<span class="at">sex =</span> <span class="fu">case_match</span>(TESEX, <span class="dv">1</span> <span class="sc">~</span> <span class="st">"M"</span>, <span class="dv">2</span> <span class="sc">~</span> <span class="st">"F"</span>)),</span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>         <span class="at">act =</span> file <span class="sc">|&gt;</span> </span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>           <span class="fu">mutate</span>(<span class="at">activity_n_of_day =</span> TUACTIVITY_N, </span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>                  <span class="at">time_spent_min =</span> TUACTDUR24, </span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>                  <span class="at">start_time =</span> TUSTARTTIM, </span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>                  <span class="at">stop_time =</span> TUSTOPTIME, </span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>                  <span class="at">level1_code =</span> <span class="fu">paste0</span>(TRTIER1P, <span class="st">"0000"</span>), </span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>                  <span class="at">level2_code =</span> <span class="fu">paste0</span>(TRTIER2P, <span class="st">"00"</span>), </span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>                  <span class="at">level3_code =</span> TRCODEP,</span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>                  <span class="co"># 7. Location of Activity </span></span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>                  <span class="at">location =</span> <span class="fu">case_match</span>(TEWHERE,</span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>                                        <span class="dv">1</span> <span class="sc">~</span> <span class="st">"Home"</span>,</span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>                                        <span class="dv">2</span> <span class="sc">~</span> <span class="st">"Work"</span>,</span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>                                        <span class="dv">3</span> <span class="sc">~</span> <span class="st">"Someone else's home"</span>,</span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>                                        <span class="dv">4</span> <span class="sc">~</span> <span class="st">"Restaurant/Bar"</span>,</span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a>                                        <span class="dv">5</span> <span class="sc">~</span> <span class="st">"Place of worship"</span>,</span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a>                                        <span class="dv">6</span> <span class="sc">~</span> <span class="st">"Grocery store"</span>,</span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>                                        <span class="dv">12</span> <span class="sc">~</span> <span class="st">"Public Transit"</span>,</span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">.default =</span> <span class="st">"Other/Travel"</span>))</span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a>  ) </span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a>  res<span class="sc">|&gt;</span> </span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="at">participant_id =</span> <span class="fu">any_of</span>(<span class="fu">c</span>(<span class="st">"TUCASEID"</span>, <span class="st">"tucaseid"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename_with</span>(tolower) <span class="sc">|&gt;</span> </span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="fu">matches</span>(<span class="st">"[:lower:]"</span>, <span class="at">ignore.case =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a>load_atus_activities <span class="ot">&lt;-</span> <span class="cf">function</span>(){</span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">dir.exists</span>(<span class="fu">file.path</span>(<span class="st">"data"</span>, <span class="st">"mp02"</span>))){</span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dir.create</span>(<span class="fu">file.path</span>(<span class="st">"data"</span>, <span class="st">"mp02"</span>), <span class="at">showWarnings=</span><span class="cn">FALSE</span>, <span class="at">recursive=</span><span class="cn">TRUE</span>)</span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a>  dest_file <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="st">"data"</span>,</span>
+<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"mp02"</span>,</span>
+<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"atus_activity_codes.csv"</span>)</span>
+<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(dest_file)){</span>
+<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a>    <span class="fu">download.file</span>(<span class="st">"https://michael-weylandt.com/STA9750/mini/atus_activity_codes.csv"</span>, </span>
+<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a>                  <span class="at">quiet=</span><span class="cn">TRUE</span>, </span>
+<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a>                  <span class="at">destfile=</span>dest_file, </span>
+<span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a>                  <span class="at">mode=</span><span class="st">"wb"</span>)</span>
+<span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb3-117"><a href="#cb3-117" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-118"><a href="#cb3-118" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">load_atus_data</span>(<span class="st">"resp"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-117"><a href="#cb3-117" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_csv</span>(dest_file, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-118"><a href="#cb3-118" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-119"><a href="#cb3-119" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-120"><a href="#cb3-120" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">load_atus_data</span>(<span class="st">"resp"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: There was 1 warning in `mutate()`.
@@ -312,8 +314,8 @@ Caused by warning:
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>rost <span class="ot">&lt;-</span> <span class="fu">load_atus_data</span>(<span class="st">"rost"</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>act <span class="ot">&lt;-</span> <span class="fu">load_atus_data</span>(<span class="st">"act"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>act <span class="ot">&lt;-</span> <span class="fu">load_atus_data</span>(<span class="st">"act"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>rost <span class="ot">&lt;-</span> <span class="fu">load_atus_data</span>(<span class="st">"rost"</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>activities <span class="ot">&lt;-</span> <span class="fu">load_atus_activities</span>()</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
@@ -335,23 +337,26 @@ Caused by warning:
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(rost, <span class="fu">join_by</span>(participant_id <span class="sc">==</span> participant_id))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 50,000 × 12
-   participant_id time_alone survey_year occ_code month survey_weight
-            &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;         &lt;dbl&gt;
- 1        2.00e13        525        2003     2310     1      8155463.
- 2        2.00e13        525        2003     2310     1      8155463.
- 3        2.00e13        525        2003     2310     1      8155463.
- 4        2.00e13          0        2003     4850     1      1735323.
- 5        2.00e13          0        2003     4850     1      1735323.
- 6        2.00e13          0        2003     4850     1      1735323.
- 7        2.00e13          0        2003     4850     1      1735323.
- 8        2.00e13        475        2003     4600     1      3830527.
- 9        2.00e13        475        2003     4600     1      3830527.
-10        2.00e13        350        2003       -1     1      6622023.
+<pre><code># A tibble: 50,000 × 133
+   participant_id tulineno.x tespuhrs trdtind1 trdtocc1 trernhly trernupd
+            &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+ 1        2.00e13          1       -1       40        8     2200        1
+ 2        2.00e13          1       -1       40        8     2200        1
+ 3        2.00e13          1       -1       40        8     2200        1
+ 4        2.00e13          1       50       16       16       -1        1
+ 5        2.00e13          1       50       16       16       -1        1
+ 6        2.00e13          1       50       16       16       -1        1
+ 7        2.00e13          1       50       16       16       -1        1
+ 8        2.00e13          1       -1       43       15     1250        0
+ 9        2.00e13          1       -1       43       15     1250        0
+10        2.00e13          1       40       -1       -1       -1       -1
 # ℹ 49,990 more rows
-# ℹ 6 more variables: has_children &lt;chr&gt;, marital_status &lt;chr&gt;,
-#   employment_status &lt;chr&gt;, is_college_student &lt;lgl&gt;, is_retired &lt;lgl&gt;,
-#   sex &lt;chr&gt;</code></pre>
+# ℹ 126 more variables: trhernal &lt;dbl&gt;, trhhchild &lt;dbl&gt;, trimind1 &lt;dbl&gt;,
+#   trmjind1 &lt;dbl&gt;, trmjocc1 &lt;dbl&gt;, trmjocgr &lt;dbl&gt;, trnhhchild &lt;dbl&gt;,
+#   trnumhou &lt;dbl&gt;, trohhchild &lt;dbl&gt;, time_alone &lt;dbl&gt;, trtcc &lt;dbl&gt;,
+#   trthhfamily &lt;dbl&gt;, trtnochild &lt;dbl&gt;, trtnohh &lt;dbl&gt;, trto &lt;dbl&gt;,
+#   trtohh &lt;dbl&gt;, trtohhchild &lt;dbl&gt;, trtonhh &lt;dbl&gt;, trtonhhchild &lt;dbl&gt;,
+#   trtsponly &lt;dbl&gt;, trtspouse &lt;dbl&gt;, trtunmpart &lt;dbl&gt;, trwernal &lt;dbl&gt;, …</code></pre>
 </div>
 <details class="code-fold">
 <summary>Code</summary>
@@ -546,26 +551,26 @@ Caused by warning:
 <span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fmt_number</span>(<span class="at">columns =</span> avg_min, <span class="at">decimals =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
 <span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cols_label</span>(<span class="at">employment_status =</span> <span class="st">"Status"</span>, <span class="at">avg_min =</span> <span class="st">"Avg. Minutes"</span>) <span class="sc">|&gt;</span></span>
 <span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>   <span class="fu">tab_source_note</span>(<span class="fu">md</span>(</span>
-<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>      <span class="st">"According to the results in the table, obtained by an ATUS survey, Unemployed people (Not in Labor Force) spend more time taking care of their lawn by 5.34%.than employed pleope. This could mean that unemployed peole have more free time to mown their lawn and take are of their plants. "</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>      <span class="st">"According to the results from the ATUS survey, individuals who are not in the labor force spend 5.34% more time on lawn care than those who are employed. This suggests that unemployed individuals may utilize their additional free time to mow their lawns and tend to their gardens. "</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div id="gbldqeiucg" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#gbldqeiucg table {
+<div id="hiyabfhahy" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#hiyabfhahy table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#gbldqeiucg thead, #gbldqeiucg tbody, #gbldqeiucg tfoot, #gbldqeiucg tr, #gbldqeiucg td, #gbldqeiucg th {
+#hiyabfhahy thead, #hiyabfhahy tbody, #hiyabfhahy tfoot, #hiyabfhahy tr, #hiyabfhahy td, #hiyabfhahy th {
   border-style: none;
 }
 
-#gbldqeiucg p {
+#hiyabfhahy p {
   margin: 0;
   padding: 0;
 }
 
-#gbldqeiucg .gt_table {
+#hiyabfhahy .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -591,12 +596,12 @@ Caused by warning:
   border-left-color: #D3D3D3;
 }
 
-#gbldqeiucg .gt_caption {
+#hiyabfhahy .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#gbldqeiucg .gt_title {
+#hiyabfhahy .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -608,7 +613,7 @@ Caused by warning:
   border-bottom-width: 0;
 }
 
-#gbldqeiucg .gt_subtitle {
+#hiyabfhahy .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -620,7 +625,7 @@ Caused by warning:
   border-top-width: 0;
 }
 
-#gbldqeiucg .gt_heading {
+#hiyabfhahy .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -632,13 +637,13 @@ Caused by warning:
   border-right-color: #D3D3D3;
 }
 
-#gbldqeiucg .gt_bottom_border {
+#hiyabfhahy .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#gbldqeiucg .gt_col_headings {
+#hiyabfhahy .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -653,7 +658,7 @@ Caused by warning:
   border-right-color: #D3D3D3;
 }
 
-#gbldqeiucg .gt_col_heading {
+#hiyabfhahy .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -673,7 +678,7 @@ Caused by warning:
   overflow-x: hidden;
 }
 
-#gbldqeiucg .gt_column_spanner_outer {
+#hiyabfhahy .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -685,15 +690,15 @@ Caused by warning:
   padding-right: 4px;
 }
 
-#gbldqeiucg .gt_column_spanner_outer:first-child {
+#hiyabfhahy .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#gbldqeiucg .gt_column_spanner_outer:last-child {
+#hiyabfhahy .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#gbldqeiucg .gt_column_spanner {
+#hiyabfhahy .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -705,11 +710,11 @@ Caused by warning:
   width: 100%;
 }
 
-#gbldqeiucg .gt_spanner_row {
+#hiyabfhahy .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#gbldqeiucg .gt_group_heading {
+#hiyabfhahy .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -735,7 +740,7 @@ Caused by warning:
   text-align: left;
 }
 
-#gbldqeiucg .gt_empty_group_heading {
+#hiyabfhahy .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -750,15 +755,15 @@ Caused by warning:
   vertical-align: middle;
 }
 
-#gbldqeiucg .gt_from_md > :first-child {
+#hiyabfhahy .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#gbldqeiucg .gt_from_md > :last-child {
+#hiyabfhahy .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#gbldqeiucg .gt_row {
+#hiyabfhahy .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -777,7 +782,7 @@ Caused by warning:
   overflow-x: hidden;
 }
 
-#gbldqeiucg .gt_stub {
+#hiyabfhahy .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -790,7 +795,7 @@ Caused by warning:
   padding-right: 5px;
 }
 
-#gbldqeiucg .gt_stub_row_group {
+#hiyabfhahy .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -804,15 +809,15 @@ Caused by warning:
   vertical-align: top;
 }
 
-#gbldqeiucg .gt_row_group_first td {
+#hiyabfhahy .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#gbldqeiucg .gt_row_group_first th {
+#hiyabfhahy .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#gbldqeiucg .gt_summary_row {
+#hiyabfhahy .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -822,16 +827,16 @@ Caused by warning:
   padding-right: 5px;
 }
 
-#gbldqeiucg .gt_first_summary_row {
+#hiyabfhahy .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#gbldqeiucg .gt_first_summary_row.thick {
+#hiyabfhahy .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#gbldqeiucg .gt_last_summary_row {
+#hiyabfhahy .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -841,7 +846,7 @@ Caused by warning:
   border-bottom-color: #D3D3D3;
 }
 
-#gbldqeiucg .gt_grand_summary_row {
+#hiyabfhahy .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -851,7 +856,7 @@ Caused by warning:
   padding-right: 5px;
 }
 
-#gbldqeiucg .gt_first_grand_summary_row {
+#hiyabfhahy .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -861,7 +866,7 @@ Caused by warning:
   border-top-color: #D3D3D3;
 }
 
-#gbldqeiucg .gt_last_grand_summary_row_top {
+#hiyabfhahy .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -871,11 +876,11 @@ Caused by warning:
   border-bottom-color: #D3D3D3;
 }
 
-#gbldqeiucg .gt_striped {
+#hiyabfhahy .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#gbldqeiucg .gt_table_body {
+#hiyabfhahy .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -884,7 +889,7 @@ Caused by warning:
   border-bottom-color: #D3D3D3;
 }
 
-#gbldqeiucg .gt_footnotes {
+#hiyabfhahy .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -898,7 +903,7 @@ Caused by warning:
   border-right-color: #D3D3D3;
 }
 
-#gbldqeiucg .gt_footnote {
+#hiyabfhahy .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -907,7 +912,7 @@ Caused by warning:
   padding-right: 5px;
 }
 
-#gbldqeiucg .gt_sourcenotes {
+#hiyabfhahy .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -921,7 +926,7 @@ Caused by warning:
   border-right-color: #D3D3D3;
 }
 
-#gbldqeiucg .gt_sourcenote {
+#hiyabfhahy .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -929,72 +934,72 @@ Caused by warning:
   padding-right: 5px;
 }
 
-#gbldqeiucg .gt_left {
+#hiyabfhahy .gt_left {
   text-align: left;
 }
 
-#gbldqeiucg .gt_center {
+#hiyabfhahy .gt_center {
   text-align: center;
 }
 
-#gbldqeiucg .gt_right {
+#hiyabfhahy .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#gbldqeiucg .gt_font_normal {
+#hiyabfhahy .gt_font_normal {
   font-weight: normal;
 }
 
-#gbldqeiucg .gt_font_bold {
+#hiyabfhahy .gt_font_bold {
   font-weight: bold;
 }
 
-#gbldqeiucg .gt_font_italic {
+#hiyabfhahy .gt_font_italic {
   font-style: italic;
 }
 
-#gbldqeiucg .gt_super {
+#hiyabfhahy .gt_super {
   font-size: 65%;
 }
 
-#gbldqeiucg .gt_footnote_marks {
+#hiyabfhahy .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#gbldqeiucg .gt_asterisk {
+#hiyabfhahy .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#gbldqeiucg .gt_indent_1 {
+#hiyabfhahy .gt_indent_1 {
   text-indent: 5px;
 }
 
-#gbldqeiucg .gt_indent_2 {
+#hiyabfhahy .gt_indent_2 {
   text-indent: 10px;
 }
 
-#gbldqeiucg .gt_indent_3 {
+#hiyabfhahy .gt_indent_3 {
   text-indent: 15px;
 }
 
-#gbldqeiucg .gt_indent_4 {
+#hiyabfhahy .gt_indent_4 {
   text-indent: 20px;
 }
 
-#gbldqeiucg .gt_indent_5 {
+#hiyabfhahy .gt_indent_5 {
   text-indent: 25px;
 }
 
-#gbldqeiucg .katex-display {
+#hiyabfhahy .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#gbldqeiucg div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#hiyabfhahy div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -1023,7 +1028,7 @@ Caused by warning:
 </tr>
 </tbody><tfoot>
 <tr class="gt_sourcenotes odd">
-<td colspan="2" class="gt_sourcenote">According to the results in the table, obtained by an ATUS survey, Unemployed people (Not in Labor Force) spend more time taking care of their lawn by 5.34%.than employed pleope. This could mean that unemployed peole have more free time to mown their lawn and take are of their plants.</td>
+<td colspan="2" class="gt_sourcenote">According to the results from the ATUS survey, individuals who are not in the labor force spend 5.34% more time on lawn care than those who are employed. This suggests that unemployed individuals may utilize their additional free time to mow their lawns and tend to their gardens.</td>
 </tr>
 </tfoot>
 
@@ -1046,26 +1051,26 @@ Caused by warning:
 <span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(<span class="at">title =</span> <span class="st">"Time Spent on Social/Recreational activities 🧩 "</span>) <span class="sc">|&gt;</span></span>
 <span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fmt_number</span>(<span class="at">columns =</span> avg_leisure_hrs, <span class="at">decimals =</span> <span class="dv">2</span>) <span class="sc">|&gt;</span></span>
 <span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_source_note</span>(<span class="fu">md</span>(</span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>      <span class="st">"This table shows how many hours does people spent on social and recreational activities. Depending on thier marital status, people can spend more or less time on those activities. According to these data, Partnered people spend more time on recreational/social activites, followed by single people, and in last place, will be married people "</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>      <span class="st">"This table illustrates the amount of time people spend on social and recreational activities based on their marital status. According to the data, partnered individuals spend the most time on these activities, followed by single people. Married individuals spend the least amount of time on social and recreational activities compared to the other groups. "</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div id="neuoxasawq" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#neuoxasawq table {
+<div id="hziffxojhj" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#hziffxojhj table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#neuoxasawq thead, #neuoxasawq tbody, #neuoxasawq tfoot, #neuoxasawq tr, #neuoxasawq td, #neuoxasawq th {
+#hziffxojhj thead, #hziffxojhj tbody, #hziffxojhj tfoot, #hziffxojhj tr, #hziffxojhj td, #hziffxojhj th {
   border-style: none;
 }
 
-#neuoxasawq p {
+#hziffxojhj p {
   margin: 0;
   padding: 0;
 }
 
-#neuoxasawq .gt_table {
+#hziffxojhj .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1091,12 +1096,12 @@ Caused by warning:
   border-left-color: #D3D3D3;
 }
 
-#neuoxasawq .gt_caption {
+#hziffxojhj .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#neuoxasawq .gt_title {
+#hziffxojhj .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1108,7 +1113,7 @@ Caused by warning:
   border-bottom-width: 0;
 }
 
-#neuoxasawq .gt_subtitle {
+#hziffxojhj .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1120,7 +1125,7 @@ Caused by warning:
   border-top-width: 0;
 }
 
-#neuoxasawq .gt_heading {
+#hziffxojhj .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1132,13 +1137,13 @@ Caused by warning:
   border-right-color: #D3D3D3;
 }
 
-#neuoxasawq .gt_bottom_border {
+#hziffxojhj .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#neuoxasawq .gt_col_headings {
+#hziffxojhj .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1153,7 +1158,7 @@ Caused by warning:
   border-right-color: #D3D3D3;
 }
 
-#neuoxasawq .gt_col_heading {
+#hziffxojhj .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1173,7 +1178,7 @@ Caused by warning:
   overflow-x: hidden;
 }
 
-#neuoxasawq .gt_column_spanner_outer {
+#hziffxojhj .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1185,15 +1190,15 @@ Caused by warning:
   padding-right: 4px;
 }
 
-#neuoxasawq .gt_column_spanner_outer:first-child {
+#hziffxojhj .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#neuoxasawq .gt_column_spanner_outer:last-child {
+#hziffxojhj .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#neuoxasawq .gt_column_spanner {
+#hziffxojhj .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1205,11 +1210,11 @@ Caused by warning:
   width: 100%;
 }
 
-#neuoxasawq .gt_spanner_row {
+#hziffxojhj .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#neuoxasawq .gt_group_heading {
+#hziffxojhj .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1235,7 +1240,7 @@ Caused by warning:
   text-align: left;
 }
 
-#neuoxasawq .gt_empty_group_heading {
+#hziffxojhj .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1250,15 +1255,15 @@ Caused by warning:
   vertical-align: middle;
 }
 
-#neuoxasawq .gt_from_md > :first-child {
+#hziffxojhj .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#neuoxasawq .gt_from_md > :last-child {
+#hziffxojhj .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#neuoxasawq .gt_row {
+#hziffxojhj .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1277,7 +1282,7 @@ Caused by warning:
   overflow-x: hidden;
 }
 
-#neuoxasawq .gt_stub {
+#hziffxojhj .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1290,7 +1295,7 @@ Caused by warning:
   padding-right: 5px;
 }
 
-#neuoxasawq .gt_stub_row_group {
+#hziffxojhj .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1304,15 +1309,15 @@ Caused by warning:
   vertical-align: top;
 }
 
-#neuoxasawq .gt_row_group_first td {
+#hziffxojhj .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#neuoxasawq .gt_row_group_first th {
+#hziffxojhj .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#neuoxasawq .gt_summary_row {
+#hziffxojhj .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1322,16 +1327,16 @@ Caused by warning:
   padding-right: 5px;
 }
 
-#neuoxasawq .gt_first_summary_row {
+#hziffxojhj .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#neuoxasawq .gt_first_summary_row.thick {
+#hziffxojhj .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#neuoxasawq .gt_last_summary_row {
+#hziffxojhj .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1341,7 +1346,7 @@ Caused by warning:
   border-bottom-color: #D3D3D3;
 }
 
-#neuoxasawq .gt_grand_summary_row {
+#hziffxojhj .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1351,7 +1356,7 @@ Caused by warning:
   padding-right: 5px;
 }
 
-#neuoxasawq .gt_first_grand_summary_row {
+#hziffxojhj .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1361,7 +1366,7 @@ Caused by warning:
   border-top-color: #D3D3D3;
 }
 
-#neuoxasawq .gt_last_grand_summary_row_top {
+#hziffxojhj .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1371,11 +1376,11 @@ Caused by warning:
   border-bottom-color: #D3D3D3;
 }
 
-#neuoxasawq .gt_striped {
+#hziffxojhj .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#neuoxasawq .gt_table_body {
+#hziffxojhj .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1384,7 +1389,7 @@ Caused by warning:
   border-bottom-color: #D3D3D3;
 }
 
-#neuoxasawq .gt_footnotes {
+#hziffxojhj .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1398,7 +1403,7 @@ Caused by warning:
   border-right-color: #D3D3D3;
 }
 
-#neuoxasawq .gt_footnote {
+#hziffxojhj .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1407,7 +1412,7 @@ Caused by warning:
   padding-right: 5px;
 }
 
-#neuoxasawq .gt_sourcenotes {
+#hziffxojhj .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1421,7 +1426,7 @@ Caused by warning:
   border-right-color: #D3D3D3;
 }
 
-#neuoxasawq .gt_sourcenote {
+#hziffxojhj .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1429,72 +1434,72 @@ Caused by warning:
   padding-right: 5px;
 }
 
-#neuoxasawq .gt_left {
+#hziffxojhj .gt_left {
   text-align: left;
 }
 
-#neuoxasawq .gt_center {
+#hziffxojhj .gt_center {
   text-align: center;
 }
 
-#neuoxasawq .gt_right {
+#hziffxojhj .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#neuoxasawq .gt_font_normal {
+#hziffxojhj .gt_font_normal {
   font-weight: normal;
 }
 
-#neuoxasawq .gt_font_bold {
+#hziffxojhj .gt_font_bold {
   font-weight: bold;
 }
 
-#neuoxasawq .gt_font_italic {
+#hziffxojhj .gt_font_italic {
   font-style: italic;
 }
 
-#neuoxasawq .gt_super {
+#hziffxojhj .gt_super {
   font-size: 65%;
 }
 
-#neuoxasawq .gt_footnote_marks {
+#hziffxojhj .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#neuoxasawq .gt_asterisk {
+#hziffxojhj .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#neuoxasawq .gt_indent_1 {
+#hziffxojhj .gt_indent_1 {
   text-indent: 5px;
 }
 
-#neuoxasawq .gt_indent_2 {
+#hziffxojhj .gt_indent_2 {
   text-indent: 10px;
 }
 
-#neuoxasawq .gt_indent_3 {
+#hziffxojhj .gt_indent_3 {
   text-indent: 15px;
 }
 
-#neuoxasawq .gt_indent_4 {
+#hziffxojhj .gt_indent_4 {
   text-indent: 20px;
 }
 
-#neuoxasawq .gt_indent_5 {
+#hziffxojhj .gt_indent_5 {
   text-indent: 25px;
 }
 
-#neuoxasawq .katex-display {
+#hziffxojhj .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#neuoxasawq div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#hziffxojhj div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -1524,7 +1529,7 @@ Caused by warning:
 </tr>
 </tbody><tfoot>
 <tr class="gt_sourcenotes odd">
-<td colspan="2" class="gt_sourcenote">This table shows how many hours does people spent on social and recreational activities. Depending on thier marital status, people can spend more or less time on those activities. According to these data, Partnered people spend more time on recreational/social activites, followed by single people, and in last place, will be married people</td>
+<td colspan="2" class="gt_sourcenote">This table illustrates the amount of time people spend on social and recreational activities based on their marital status. According to the data, partnered individuals spend the most time on these activities, followed by single people. Married individuals spend the least amount of time on social and recreational activities compared to the other groups.</td>
 </tr>
 </tfoot>
 
@@ -1552,23 +1557,23 @@ Caused by warning:
 <span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>      <span class="st">"With the data obtained from the ATUS survey, people declared that they mainly use the public transportation to go to work "</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div id="oduhnsyvsy" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#oduhnsyvsy table {
+<div id="herpspcfrc" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#herpspcfrc table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#oduhnsyvsy thead, #oduhnsyvsy tbody, #oduhnsyvsy tfoot, #oduhnsyvsy tr, #oduhnsyvsy td, #oduhnsyvsy th {
+#herpspcfrc thead, #herpspcfrc tbody, #herpspcfrc tfoot, #herpspcfrc tr, #herpspcfrc td, #herpspcfrc th {
   border-style: none;
 }
 
-#oduhnsyvsy p {
+#herpspcfrc p {
   margin: 0;
   padding: 0;
 }
 
-#oduhnsyvsy .gt_table {
+#herpspcfrc .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1594,12 +1599,12 @@ Caused by warning:
   border-left-color: #D3D3D3;
 }
 
-#oduhnsyvsy .gt_caption {
+#herpspcfrc .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#oduhnsyvsy .gt_title {
+#herpspcfrc .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1611,7 +1616,7 @@ Caused by warning:
   border-bottom-width: 0;
 }
 
-#oduhnsyvsy .gt_subtitle {
+#herpspcfrc .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1623,7 +1628,7 @@ Caused by warning:
   border-top-width: 0;
 }
 
-#oduhnsyvsy .gt_heading {
+#herpspcfrc .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1635,13 +1640,13 @@ Caused by warning:
   border-right-color: #D3D3D3;
 }
 
-#oduhnsyvsy .gt_bottom_border {
+#herpspcfrc .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#oduhnsyvsy .gt_col_headings {
+#herpspcfrc .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1656,7 +1661,7 @@ Caused by warning:
   border-right-color: #D3D3D3;
 }
 
-#oduhnsyvsy .gt_col_heading {
+#herpspcfrc .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1676,7 +1681,7 @@ Caused by warning:
   overflow-x: hidden;
 }
 
-#oduhnsyvsy .gt_column_spanner_outer {
+#herpspcfrc .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1688,15 +1693,15 @@ Caused by warning:
   padding-right: 4px;
 }
 
-#oduhnsyvsy .gt_column_spanner_outer:first-child {
+#herpspcfrc .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#oduhnsyvsy .gt_column_spanner_outer:last-child {
+#herpspcfrc .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#oduhnsyvsy .gt_column_spanner {
+#herpspcfrc .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1708,11 +1713,11 @@ Caused by warning:
   width: 100%;
 }
 
-#oduhnsyvsy .gt_spanner_row {
+#herpspcfrc .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#oduhnsyvsy .gt_group_heading {
+#herpspcfrc .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1738,7 +1743,7 @@ Caused by warning:
   text-align: left;
 }
 
-#oduhnsyvsy .gt_empty_group_heading {
+#herpspcfrc .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1753,15 +1758,15 @@ Caused by warning:
   vertical-align: middle;
 }
 
-#oduhnsyvsy .gt_from_md > :first-child {
+#herpspcfrc .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#oduhnsyvsy .gt_from_md > :last-child {
+#herpspcfrc .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#oduhnsyvsy .gt_row {
+#herpspcfrc .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1780,7 +1785,7 @@ Caused by warning:
   overflow-x: hidden;
 }
 
-#oduhnsyvsy .gt_stub {
+#herpspcfrc .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1793,7 +1798,7 @@ Caused by warning:
   padding-right: 5px;
 }
 
-#oduhnsyvsy .gt_stub_row_group {
+#herpspcfrc .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1807,15 +1812,15 @@ Caused by warning:
   vertical-align: top;
 }
 
-#oduhnsyvsy .gt_row_group_first td {
+#herpspcfrc .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#oduhnsyvsy .gt_row_group_first th {
+#herpspcfrc .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#oduhnsyvsy .gt_summary_row {
+#herpspcfrc .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1825,16 +1830,16 @@ Caused by warning:
   padding-right: 5px;
 }
 
-#oduhnsyvsy .gt_first_summary_row {
+#herpspcfrc .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#oduhnsyvsy .gt_first_summary_row.thick {
+#herpspcfrc .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#oduhnsyvsy .gt_last_summary_row {
+#herpspcfrc .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1844,7 +1849,7 @@ Caused by warning:
   border-bottom-color: #D3D3D3;
 }
 
-#oduhnsyvsy .gt_grand_summary_row {
+#herpspcfrc .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1854,7 +1859,7 @@ Caused by warning:
   padding-right: 5px;
 }
 
-#oduhnsyvsy .gt_first_grand_summary_row {
+#herpspcfrc .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1864,7 +1869,7 @@ Caused by warning:
   border-top-color: #D3D3D3;
 }
 
-#oduhnsyvsy .gt_last_grand_summary_row_top {
+#herpspcfrc .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1874,11 +1879,11 @@ Caused by warning:
   border-bottom-color: #D3D3D3;
 }
 
-#oduhnsyvsy .gt_striped {
+#herpspcfrc .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#oduhnsyvsy .gt_table_body {
+#herpspcfrc .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1887,7 +1892,7 @@ Caused by warning:
   border-bottom-color: #D3D3D3;
 }
 
-#oduhnsyvsy .gt_footnotes {
+#herpspcfrc .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1901,7 +1906,7 @@ Caused by warning:
   border-right-color: #D3D3D3;
 }
 
-#oduhnsyvsy .gt_footnote {
+#herpspcfrc .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1910,7 +1915,7 @@ Caused by warning:
   padding-right: 5px;
 }
 
-#oduhnsyvsy .gt_sourcenotes {
+#herpspcfrc .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1924,7 +1929,7 @@ Caused by warning:
   border-right-color: #D3D3D3;
 }
 
-#oduhnsyvsy .gt_sourcenote {
+#herpspcfrc .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1932,72 +1937,72 @@ Caused by warning:
   padding-right: 5px;
 }
 
-#oduhnsyvsy .gt_left {
+#herpspcfrc .gt_left {
   text-align: left;
 }
 
-#oduhnsyvsy .gt_center {
+#herpspcfrc .gt_center {
   text-align: center;
 }
 
-#oduhnsyvsy .gt_right {
+#herpspcfrc .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#oduhnsyvsy .gt_font_normal {
+#herpspcfrc .gt_font_normal {
   font-weight: normal;
 }
 
-#oduhnsyvsy .gt_font_bold {
+#herpspcfrc .gt_font_bold {
   font-weight: bold;
 }
 
-#oduhnsyvsy .gt_font_italic {
+#herpspcfrc .gt_font_italic {
   font-style: italic;
 }
 
-#oduhnsyvsy .gt_super {
+#herpspcfrc .gt_super {
   font-size: 65%;
 }
 
-#oduhnsyvsy .gt_footnote_marks {
+#herpspcfrc .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#oduhnsyvsy .gt_asterisk {
+#herpspcfrc .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#oduhnsyvsy .gt_indent_1 {
+#herpspcfrc .gt_indent_1 {
   text-indent: 5px;
 }
 
-#oduhnsyvsy .gt_indent_2 {
+#herpspcfrc .gt_indent_2 {
   text-indent: 10px;
 }
 
-#oduhnsyvsy .gt_indent_3 {
+#herpspcfrc .gt_indent_3 {
   text-indent: 15px;
 }
 
-#oduhnsyvsy .gt_indent_4 {
+#herpspcfrc .gt_indent_4 {
   text-indent: 20px;
 }
 
-#oduhnsyvsy .gt_indent_5 {
+#herpspcfrc .gt_indent_5 {
   text-indent: 25px;
 }
 
-#oduhnsyvsy .katex-display {
+#herpspcfrc .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#oduhnsyvsy div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#herpspcfrc div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -2044,28 +2049,29 @@ Caused by warning:
 </div>
 </div>
 </div>
-</section>
-<section id="summer-education-employees" class="level3">
-<h3 class="anchored" data-anchor-id="summer-education-employees">6.2 Summer Education Employees</h3>
+<p>###5.5</p>
+<p>###6.1 Household activities and age</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>df_joined <span class="sc">|&gt;</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Codes 2200-2340 generally cover Education, Training, and Library Occupations</span></span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(occ_code <span class="sc">&gt;=</span> <span class="dv">2200</span> <span class="sc">&amp;</span> occ_code <span class="sc">&lt;=</span> <span class="dv">2340</span>) <span class="sc">|&gt;</span></span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(month <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">7</span>, <span class="dv">8</span>)) <span class="sc">|&gt;</span> <span class="co"># June, July, August</span></span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(task_level2) <span class="sc">|&gt;</span></span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">avg_min =</span> <span class="fu">weighted.mean</span>(time_spent_min, survey_weight, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(avg_min, <span class="at">n =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(task_level2, avg_min), <span class="at">y =</span> avg_min, <span class="at">fill =</span> avg_min)) <span class="sc">+</span></span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
-<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
-<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low =</span> <span class="st">"skyblue"</span>, <span class="at">high =</span> <span class="st">"darkblue"</span>) <span class="sc">+</span></span>
-<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Summer Activities for Education Professionals ☀️"</span>,</span>
-<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Activity Category"</span>,</span>
-<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Avg Minutes/Day"</span>) <span class="sc">+</span></span>
-<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>hh_age_data <span class="ot">&lt;-</span> act <span class="sc">|&gt;</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(level1_code <span class="sc">==</span> <span class="st">"020000"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Use tulineno (lowercase) to identify the respondent</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">inner_join</span>(rost <span class="sc">|&gt;</span> <span class="fu">filter</span>(tulineno <span class="sc">==</span> <span class="dv">1</span>), <span class="at">by =</span> <span class="st">"participant_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">inner_join</span>(resp, <span class="at">by =</span> <span class="st">"participant_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(age) <span class="sc">|&gt;</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">avg_hh_time =</span> <span class="fu">weighted.mean</span>(time_spent_min, survey_weight))</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(hh_age_data, <span class="fu">aes</span>(<span class="at">x =</span> age, <span class="at">y =</span> avg_hh_time)) <span class="sc">+</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="at">color =</span> <span class="st">"steelblue"</span>) <span class="sc">+</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Time Spent on Household Activities by Age"</span>,</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">x =</span> <span class="st">"Age"</span>, <span class="at">y =</span> <span class="st">"Average Minutes per Day"</span>) <span class="sc">+</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -2074,16 +2080,733 @@ Caused by warning:
 </div>
 </div>
 </div>
-<p>quarto::quarto_render(“mp02.qmd”)</p>
+<section id="section" class="level4">
+<h4 class="anchored" data-anchor-id="section"></h4>
+<p>In this graphic, we analyzed how much time Americans spend on household activities. According to the results, teenagers (under age 20) and people in their 50s and 60s spend less time on these tasks than other age groups. Interestingly, the end of the graph shows that people over 70 see a positive increase in time spent, making them the most active group in this category..####</p>
 </section>
 </section>
-<section id="exploratory-analysis" class="level2">
-<h2 class="anchored" data-anchor-id="exploratory-analysis">Exploratory Analysis</h2>
-<p>Code related to Exploratory Data Analysis goes here. This may include exploratory graphics, instructor-provided exploratory questions, or other similar elements.</p>
+<section id="summer-education-employees" class="level3">
+<h3 class="anchored" data-anchor-id="summer-education-employees">6.2 Summer Education Employees</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>df_joined <span class="sc">|&gt;</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Codes 2200-2340 generally cover Education, Training, and Library Occupations</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(occ_code <span class="sc">&gt;=</span> <span class="dv">2200</span> <span class="sc">&amp;</span> occ_code <span class="sc">&lt;=</span> <span class="dv">2340</span>) <span class="sc">|&gt;</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(month <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">7</span>, <span class="dv">8</span>)) <span class="sc">|&gt;</span> <span class="co"># June, July, August</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(task_level2) <span class="sc">|&gt;</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">avg_min =</span> <span class="fu">weighted.mean</span>(time_spent_min, survey_weight, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(avg_min, <span class="at">n =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(task_level2, avg_min), <span class="at">y =</span> avg_min, <span class="at">fill =</span> avg_min)) <span class="sc">+</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low =</span> <span class="st">"skyblue"</span>, <span class="at">high =</span> <span class="st">"darkblue"</span>) <span class="sc">+</span></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Summer Activities for Education Professionals ☀️"</span>,</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Activity Category"</span>,</span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Avg Minutes/Day"</span>) <span class="sc">+</span></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mp02_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="education-employees-often-enjoy-the-perk-of-having-summers-off-similar-to-students.-from-june-to-august-they-have-the-opportunity-to-engage-in-their-favorite-leisure-activities.-this-graph-displays-the-ten-most-popular-activities-and-the-average-minutes-spent-on-each.-sleeping-ranks-as-the-number-one-activity-accounting-for-more-than-225-minutes.-following-that-the-next-three-most-popular-activitiesattending-or-hosting-social-events-attending-sports-and-workingoccupy-between-150-and-175-minutes.-the-remaining-six-activities-are-less-common-with-employees-spending-fewer-than-150-minutes-per-day-on-them." class="level4">
+<h4 class="anchored" data-anchor-id="education-employees-often-enjoy-the-perk-of-having-summers-off-similar-to-students.-from-june-to-august-they-have-the-opportunity-to-engage-in-their-favorite-leisure-activities.-this-graph-displays-the-ten-most-popular-activities-and-the-average-minutes-spent-on-each.-sleeping-ranks-as-the-number-one-activity-accounting-for-more-than-225-minutes.-following-that-the-next-three-most-popular-activitiesattending-or-hosting-social-events-attending-sports-and-workingoccupy-between-150-and-175-minutes.-the-remaining-six-activities-are-less-common-with-employees-spending-fewer-than-150-minutes-per-day-on-them.">Education employees often enjoy the perk of having summers off, similar to students. From June to August, they have the opportunity to engage in their favorite leisure activities. This graph displays the ten most popular activities and the average minutes spent on each. Sleeping ranks as the number one activity, accounting for more than 225 minutes. Following that, the next three most popular activities—attending or hosting social events, attending sports, and working—occupy between 150 and 175 minutes. The remaining six activities are less common, with employees spending fewer than 150 minutes per day on them.</h4>
+<p>###6.3 Education Activities</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>student_study <span class="ot">&lt;-</span> act <span class="sc">|&gt;</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(level1_code <span class="sc">==</span> <span class="st">"060000"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">inner_join</span>(resp, <span class="at">by =</span> <span class="st">"participant_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">inner_join</span>(rost <span class="sc">|&gt;</span> <span class="fu">filter</span>(tulineno <span class="sc">==</span> <span class="dv">1</span>), <span class="at">by =</span> <span class="st">"participant_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(is_college_student <span class="sc">==</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(age) <span class="sc">|&gt;</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">avg_study =</span> <span class="fu">weighted.mean</span>(time_spent_min, survey_weight))</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(student_study, <span class="fu">aes</span>(<span class="at">x =</span> age, <span class="at">y =</span> avg_study)) <span class="sc">+</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">color =</span> <span class="st">"purple"</span>) <span class="sc">+</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Study Time vs. Age for Enrolled Students"</span>,</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">x =</span> <span class="st">"Age"</span>, <span class="at">y =</span> <span class="st">"Avg Minutes per Day"</span>) <span class="sc">+</span></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mp02_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="based-on-the-sample-of-students-interviewed-for-this-survey-it-appears-that-older-students-spend-more-time-on-educational-activities-such-as-studying-doing-homework-and-attending-class.-the-data-suggests-a-positive-correlation-as-age-increases-so-does-the-time-spent-on-education.-however-this-trend-may-be-influenced-by-outliers-in-the-3035-age-group-where-some-individuals-reported-over-400-minutes-of-daily-educational-activity" class="level4">
+<h4 class="anchored" data-anchor-id="based-on-the-sample-of-students-interviewed-for-this-survey-it-appears-that-older-students-spend-more-time-on-educational-activities-such-as-studying-doing-homework-and-attending-class.-the-data-suggests-a-positive-correlation-as-age-increases-so-does-the-time-spent-on-education.-however-this-trend-may-be-influenced-by-outliers-in-the-3035-age-group-where-some-individuals-reported-over-400-minutes-of-daily-educational-activity">Based on the sample of students interviewed for this survey, it appears that older students spend more time on educational activities such as studying, doing homework, and attending class. The data suggests a positive correlation: as age increases, so does the time spent on education. However, this trend may be influenced by outliers in the 30–35 age group, where some individuals reported over 400 minutes of daily educational activity</h4>
+<p>###6.4 Sport interests</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggbump)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>bump_data <span class="ot">&lt;-</span> act <span class="sc">|&gt;</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(level2_code <span class="sc">==</span> <span class="st">"130200"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">inner_join</span>(rost <span class="sc">|&gt;</span> <span class="fu">filter</span>(tulineno <span class="sc">==</span> <span class="dv">1</span>), <span class="at">by =</span> <span class="st">"participant_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">inner_join</span>(resp, <span class="at">by =</span> <span class="st">"participant_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">age_bin =</span> <span class="fu">cut</span>(age, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">15</span>, <span class="dv">85</span>, <span class="at">by =</span> <span class="dv">10</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(age_bin, level3_code) <span class="sc">|&gt;</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">mean_time =</span> <span class="fu">weighted.mean</span>(time_spent_min, survey_weight), <span class="at">.groups =</span> <span class="st">'drop'</span>) <span class="sc">|&gt;</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- ADD THE NAMES HERE ---</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">sport_name =</span> <span class="fu">case_when</span>(</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>        level3_code <span class="sc">==</span> <span class="st">"130203"</span> <span class="sc">~</span> <span class="st">"Basketball"</span>,</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>        level3_code <span class="sc">==</span> <span class="st">"130205"</span> <span class="sc">~</span> <span class="st">"Billiards"</span>,</span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>        level3_code <span class="sc">==</span> <span class="st">"130206"</span> <span class="sc">~</span> <span class="st">"Soccer"</span>,</span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>        level3_code <span class="sc">==</span> <span class="st">"130207"</span> <span class="sc">~</span> <span class="st">"Bowling"</span>,</span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>        level3_code <span class="sc">==</span> <span class="st">"130213"</span> <span class="sc">~</span> <span class="st">"Football"</span>,</span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>        level3_code <span class="sc">==</span> <span class="st">"130214"</span> <span class="sc">~</span> <span class="st">"Golfing"</span>,</span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>        level3_code <span class="sc">==</span> <span class="st">"130216"</span> <span class="sc">~</span> <span class="st">"Hockey"</span>,</span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>        level3_code <span class="sc">==</span> <span class="st">"130220"</span> <span class="sc">~</span> <span class="st">"Roller Skating"</span>,</span>
+<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a>        level3_code <span class="sc">==</span> <span class="st">"130221"</span> <span class="sc">~</span> <span class="st">"Rugby"</span>,</span>
+<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>        level3_code <span class="sc">==</span> <span class="st">"130226"</span> <span class="sc">~</span> <span class="st">"Vehicle Touring"</span>,</span>
+<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a>        level3_code <span class="sc">==</span> <span class="st">"130227"</span> <span class="sc">~</span> <span class="st">"Volleyball"</span>,</span>
+<span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a>        level3_code <span class="sc">==</span> <span class="st">"130230"</span> <span class="sc">~</span> <span class="st">"Weightlifting"</span>,</span>
+<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a>        level3_code <span class="sc">==</span> <span class="st">"130232"</span> <span class="sc">~</span> <span class="st">"Wrestling"</span>,</span>
+<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a>        level3_code <span class="sc">==</span> <span class="st">"130299"</span> <span class="sc">~</span> <span class="st">"Attending Sporting Events"</span>,</span>
+<span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>        <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"Other Sport"</span></span>
+<span id="cb34-27"><a href="#cb34-27" aria-hidden="true" tabindex="-1"></a>    )) <span class="sc">|&gt;</span></span>
+<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(age_bin) <span class="sc">|&gt;</span></span>
+<span id="cb34-29"><a href="#cb34-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">rank =</span> <span class="fu">rank</span>(<span class="fu">desc</span>(mean_time), <span class="at">ties.method =</span> <span class="st">"random"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb34-30"><a href="#cb34-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(rank <span class="sc">&lt;=</span> <span class="dv">5</span>)</span>
+<span id="cb34-31"><a href="#cb34-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-32"><a href="#cb34-32" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bump_data, <span class="fu">aes</span>(<span class="at">x =</span> age_bin, <span class="at">y =</span> rank, <span class="at">color =</span> sport_name, <span class="at">group =</span> sport_name)) <span class="sc">+</span></span>
+<span id="cb34-33"><a href="#cb34-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bump</span>(<span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span>  </span>
+<span id="cb34-34"><a href="#cb34-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb34-35"><a href="#cb34-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>(<span class="at">breaks =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb34-36"><a href="#cb34-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Sports Popularity Rank by Age Group"</span>, </span>
+<span id="cb34-37"><a href="#cb34-37" aria-hidden="true" tabindex="-1"></a>         <span class="at">x =</span> <span class="st">"Age Group"</span>, </span>
+<span id="cb34-38"><a href="#cb34-38" aria-hidden="true" tabindex="-1"></a>         <span class="at">y =</span> <span class="st">"Rank"</span>,</span>
+<span id="cb34-39"><a href="#cb34-39" aria-hidden="true" tabindex="-1"></a>         <span class="at">color =</span> <span class="st">"Sport"</span>) <span class="sc">+</span> </span>
+<span id="cb34-40"><a href="#cb34-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mp02_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>####This bump chart shows that the sports people like to go watch really change as they get older. For younger people (ages 15 to 35), watching football is usually the #1 thing to do. But once people hit middle age, they start getting into all kinds of different sports instead of just the main ones. #</p>
+<p>###6.5 Time Spent per child</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>Time_child_data <span class="ot">&lt;-</span> act <span class="sc">|&gt;</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(level1_code <span class="sc">==</span> <span class="st">"030000"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">inner_join</span>(resp, <span class="at">by =</span> <span class="st">"participant_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(trchildnum <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(participant_id, trchildnum, survey_weight) <span class="sc">|&gt;</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">total_care =</span> <span class="fu">sum</span>(time_spent_min), <span class="at">.groups =</span> <span class="st">'drop'</span>) <span class="sc">|&gt;</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">time_per_child =</span> total_care <span class="sc">/</span> trchildnum) <span class="sc">|&gt;</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(trchildnum) <span class="sc">|&gt;</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">final_avg =</span> <span class="fu">weighted.mean</span>(time_per_child, survey_weight))</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(Time_child_data, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(trchildnum), <span class="at">y =</span> final_avg)) <span class="sc">+</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"coral"</span>) <span class="sc">+</span></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Care Time Per Individual Child"</span>, <span class="at">x =</span> <span class="st">"Number of Children"</span>, <span class="at">y =</span> <span class="st">"Minutes per Child"</span>) <span class="sc">+</span></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mp02_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="the-histogram-shows-a-clear-negative-trend.-a-single-child-receives-the-most-one-on-one-care-time-from-their-parents-however-as-the-number-of-children-in-a-household-increases-the-care-time-per-child-decreases.-as-a-result-a-child-in-a-family-of-seven-receives-less-than-12-minutes-of-exclusive-care-which-is-a-huge-contrast-to-the-80-minutes-spent-on-an-only-child" class="level4">
+<h4 class="anchored" data-anchor-id="the-histogram-shows-a-clear-negative-trend.-a-single-child-receives-the-most-one-on-one-care-time-from-their-parents-however-as-the-number-of-children-in-a-household-increases-the-care-time-per-child-decreases.-as-a-result-a-child-in-a-family-of-seven-receives-less-than-12-minutes-of-exclusive-care-which-is-a-huge-contrast-to-the-80-minutes-spent-on-an-only-child">The histogram shows a clear negative trend. A single child receives the most one-on-one care time from their parents; however, as the number of children in a household increases, the care time per child decreases. As a result, a child in a family of seven receives less than 12 minutes of exclusive care, which is a huge contrast to the 80+ minutes spent on an only child</h4>
+</section>
+</section>
 </section>
 <section id="final-insights-and-deliverable" class="level2">
 <h2 class="anchored" data-anchor-id="final-insights-and-deliverable">Final Insights and Deliverable</h2>
-<p>Code related to the final deliverable of the assignment goes here.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>respondent_info <span class="ot">&lt;-</span> resp <span class="sc">|&gt;</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">inner_join</span>(rost <span class="sc">|&gt;</span> </span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">filter</span>(tulineno <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">select</span>(participant_id, age, sex), </span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">by =</span> <span class="st">"participant_id"</span>)</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>calc_market_stats <span class="ot">&lt;-</span> <span class="cf">function</span>(df, label, <span class="at">target_offset =</span> <span class="dv">30</span>) {</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>    df <span class="sc">|&gt;</span></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>        <span class="fu">group_by</span>(participant_id, survey_weight) <span class="sc">|&gt;</span></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>        <span class="fu">summarize</span>(<span class="at">total_time =</span> <span class="fu">sum</span>(time_spent_min), <span class="at">.groups =</span> <span class="st">'drop'</span>) <span class="sc">|&gt;</span></span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>        <span class="fu">summarize</span>(</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">Demographic =</span> label,</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>            <span class="at">Low =</span> <span class="fu">quantile</span>(total_time, <span class="fl">0.25</span>),</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">Typical =</span> <span class="fu">median</span>(total_time),</span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>            <span class="at">High =</span> <span class="fu">quantile</span>(total_time, <span class="fl">0.75</span>),</span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">App_Target =</span> Typical <span class="sc">+</span> target_offset</span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Group 1: Stay-at-Home Dads</span></span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>sahd_stats <span class="ot">&lt;-</span> act <span class="sc">|&gt;</span></span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(level1_code <span class="sc">==</span> <span class="st">"030000"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">inner_join</span>(respondent_info <span class="sc">|&gt;</span></span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">filter</span>(sex <span class="sc">==</span> <span class="st">"M"</span>, trchildnum <span class="sc">&gt;</span> <span class="dv">0</span>, employment_status <span class="sc">==</span> <span class="st">"Not in Labor force"</span>), </span>
+<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a>               <span class="at">by =</span> <span class="st">"participant_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">calc_market_stats</span>(<span class="st">"Stay-at-Home Dads"</span>)</span>
+<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Group 2: Undergrads </span></span>
+<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a>student_stats <span class="ot">&lt;-</span> act <span class="sc">|&gt;</span></span>
+<span id="cb36-32"><a href="#cb36-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(level1_code <span class="sc">==</span> <span class="st">"060000"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb36-33"><a href="#cb36-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">inner_join</span>(respondent_info <span class="sc">|&gt;</span> <span class="fu">filter</span>(is_college_student <span class="sc">==</span> <span class="cn">TRUE</span>), <span class="at">by =</span> <span class="st">"participant_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb36-34"><a href="#cb36-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">calc_market_stats</span>(<span class="st">"College Undergraduates"</span>)</span>
+<span id="cb36-35"><a href="#cb36-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-36"><a href="#cb36-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Group 3: Remote Professionals</span></span>
+<span id="cb36-37"><a href="#cb36-37" aria-hidden="true" tabindex="-1"></a>remote_stats <span class="ot">&lt;-</span> act <span class="sc">|&gt;</span></span>
+<span id="cb36-38"><a href="#cb36-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(level1_code <span class="sc">==</span> <span class="st">"050000"</span>, location <span class="sc">==</span> <span class="st">"Home"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb36-39"><a href="#cb36-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">inner_join</span>(respondent_info <span class="sc">|&gt;</span> <span class="fu">filter</span>(employment_status <span class="sc">==</span> <span class="st">"Employed"</span>), <span class="at">by =</span> <span class="st">"participant_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb36-40"><a href="#cb36-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">calc_market_stats</span>(<span class="st">"Remote Professionals"</span>)</span>
+<span id="cb36-41"><a href="#cb36-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-42"><a href="#cb36-42" aria-hidden="true" tabindex="-1"></a><span class="co"># Final Table</span></span>
+<span id="cb36-43"><a href="#cb36-43" aria-hidden="true" tabindex="-1"></a><span class="fu">bind_rows</span>(sahd_stats, student_stats, remote_stats) <span class="sc">|&gt;</span></span>
+<span id="cb36-44"><a href="#cb36-44" aria-hidden="true" tabindex="-1"></a>    <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
+<span id="cb36-45"><a href="#cb36-45" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tab_header</span>(<span class="at">title =</span> <span class="st">"Market Research: Daily Time Use Targets 📟"</span>,</span>
+<span id="cb36-46"><a href="#cb36-46" aria-hidden="true" tabindex="-1"></a>               <span class="at">subtitle =</span> <span class="st">"Figures in minutes per day"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb36-47"><a href="#cb36-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fmt_number</span>(<span class="at">columns =</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">decimals =</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb36-48"><a href="#cb36-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_source_note</span>(<span class="fu">md</span>(</span>
+<span id="cb36-49"><a href="#cb36-49" aria-hidden="true" tabindex="-1"></a>      <span class="st">"This table shows how much time three different groups of people—dads at home, college students, and remote workers—spend on their main daily tasks. We looked at the 'typical' amount of time they spend and then added 30 minutes to create an 'App Target.' This target is a goal for how much time we want people to spend using an app or doing an activity. It shows that you can't have the same goal for everyone, because a student's daily schedule looks totally different from a stay-at-home dad's schedule. "</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fcdojularc" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#fcdojularc table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#fcdojularc thead, #fcdojularc tbody, #fcdojularc tfoot, #fcdojularc tr, #fcdojularc td, #fcdojularc th {
+  border-style: none;
+}
+
+#fcdojularc p {
+  margin: 0;
+  padding: 0;
+}
+
+#fcdojularc .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#fcdojularc .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#fcdojularc .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#fcdojularc .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#fcdojularc .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#fcdojularc .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#fcdojularc .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#fcdojularc .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#fcdojularc .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#fcdojularc .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#fcdojularc .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#fcdojularc .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#fcdojularc .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#fcdojularc .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#fcdojularc .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#fcdojularc .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#fcdojularc .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#fcdojularc .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#fcdojularc .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#fcdojularc .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#fcdojularc .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#fcdojularc .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#fcdojularc .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#fcdojularc .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#fcdojularc .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#fcdojularc .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#fcdojularc .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#fcdojularc .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#fcdojularc .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#fcdojularc .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#fcdojularc .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#fcdojularc .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#fcdojularc .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#fcdojularc .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#fcdojularc .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#fcdojularc .gt_left {
+  text-align: left;
+}
+
+#fcdojularc .gt_center {
+  text-align: center;
+}
+
+#fcdojularc .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#fcdojularc .gt_font_normal {
+  font-weight: normal;
+}
+
+#fcdojularc .gt_font_bold {
+  font-weight: bold;
+}
+
+#fcdojularc .gt_font_italic {
+  font-style: italic;
+}
+
+#fcdojularc .gt_super {
+  font-size: 65%;
+}
+
+#fcdojularc .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#fcdojularc .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#fcdojularc .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#fcdojularc .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#fcdojularc .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#fcdojularc .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#fcdojularc .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#fcdojularc .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#fcdojularc div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading header">
+<td colspan="5" class="gt_heading gt_title gt_font_normal">Market Research: Daily Time Use Targets 📟</td>
+</tr>
+<tr class="gt_heading even">
+<td colspan="5" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">Figures in minutes per day</td>
+</tr>
+<tr class="gt_col_headings header">
+<th id="Demographic" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Demographic</th>
+<th id="Low" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Low</th>
+<th id="Typical" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Typical</th>
+<th id="High" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">High</th>
+<th id="App_Target" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">App_Target</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" headers="Demographic">Stay-at-Home Dads</td>
+<td class="gt_row gt_right" headers="Low">60</td>
+<td class="gt_row gt_right" headers="Typical">80</td>
+<td class="gt_row gt_right" headers="High">140</td>
+<td class="gt_row gt_right" headers="App_Target">110</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Demographic">College Undergraduates</td>
+<td class="gt_row gt_right" headers="Low">150</td>
+<td class="gt_row gt_right" headers="Typical">360</td>
+<td class="gt_row gt_right" headers="High">472</td>
+<td class="gt_row gt_right" headers="App_Target">390</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Demographic">Remote Professionals</td>
+<td class="gt_row gt_right" headers="Low">30</td>
+<td class="gt_row gt_right" headers="Typical">90</td>
+<td class="gt_row gt_right" headers="High">180</td>
+<td class="gt_row gt_right" headers="App_Target">120</td>
+</tr>
+</tbody><tfoot>
+<tr class="gt_sourcenotes odd">
+<td colspan="5" class="gt_sourcenote">This table shows how much time three different groups of people—dads at home, college students, and remote workers—spend on their main daily tasks. We looked at the ‘typical’ amount of time they spend and then added 30 minutes to create an ‘App Target.’ This target is a goal for how much time we want people to spend using an app or doing an activity. It shows that you can’t have the same goal for everyone, because a student’s daily schedule looks totally different from a stay-at-home dad’s schedule.</td>
+</tr>
+</tfoot>
+
+</table>
+
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="AI Usage Statement">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>AI Usage Statement
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Gemini was used to help write the code in this project, but all non-code text was generated without the use of any Generative AI tools. Additionally, Gemini was used to provide additional background information on the topic and to brainstorm ideas for the final open-ended prompt.</p>
+</div>
+</div>
+</div>
 <hr>
 <p>This work ©2025 by anapau-tapia was initially prepared as a Mini-Project for STA 9750 at Baruch College. More details about this course can be found at <a href="https://michael-weylandt.com/STA9750">the course site</a> and instructions for this assignment can be found at <a href="https://michael-weylandt.com/STA9750/mini/mini02.html">MP #02</a></p>
 

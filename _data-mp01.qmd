@@ -1,0 +1,227 @@
+---
+  title: "Miniproject 01"
+---
+  The following report show the data of several schools in the United States of America,  including schools, quantity of students enroll of different races each year, and additional information created during this project, as a total of CUNY schools, and California public system. 
+  --------------
+  Last Updated: `r format(Sys.time(), "%A %m %d, %Y at %H:%M%p")`
+
+```{r}
+acquire_ipeds_data <- function(start_year=2010, end_year=2024){
+  library(tidyverse)
+  library(glue)
+  
+  data_dir <- file.path("data", "mp01")
+  
+  if(!dir.exists(data_dir)){
+    dir.create(data_dir, showWarnings=FALSE, recursive=TRUE)
+  }
+  
+  YEARS <- seq(start_year, end_year)
+  
+  EFA_ALL <- map(YEARS, function(yy){
+    if(yy <= 2022){
+      ef_url <- glue("https://nces.ed.gov/ipeds/datacenter/data/EF{yy}A.zip")
+      
+    } else {
+      ef_url <- glue("https://nces.ed.gov/ipeds/data-generator?year={yy}&tableName=EF{yy}A&HasRV=0&type=csv")
+    }
+    
+    ef_file <- file.path(data_dir, glue("ef{yy}a.csv.zip"))
+    
+    if(!file.exists(ef_file)){
+      message(glue("Downloading Enrollment Data for {yy} from {ef_url}"))
+      download.file(ef_url, destfile = ef_file, quiet=TRUE, mode="wb")    
+    }
+    
+    read_csv(ef_file, 
+             show_col_types=FALSE) |>
+      mutate(year = yy, 
+             # American Indian or Alaskan Native
+             enrollment_m_aian = EFAIANM, 
+             enrollment_f_aian = EFAIANW, 
+             # Asian
+             enrollment_m_asia = EFASIAM, 
+             enrollment_f_asia = EFASIAW, 
+             # Black or African-American, 
+             enrollment_m_bkaa = EFBKAAM, 
+             enrollment_f_bkaa = EFBKAAW, 
+             # Hispanic 
+             enrollment_m_hisp = EFHISPM, 
+             enrollment_f_hisp = EFHISPW, 
+             # Native Hawaiian or Other Pacific Islander 
+             enrollment_m_nhpi = EFNHPIM, 
+             enrollment_f_nhpi = EFNHPIW, 
+             # White
+             enrollment_m_whit = EFWHITM, 
+             enrollment_f_whit = EFWHITW, 
+             # Two or More Races
+             enrollment_m_2mor = EF2MORM, 
+             enrollment_f_2mor = EF2MORW, 
+             # Unknown / Undisclosed Race
+             enrollment_m_unkn = EFUNKNM, 
+             enrollment_f_unkn = EFUNKNW, 
+             # US Non-Resident
+             enrollment_m_nral = EFNRALM, 
+             enrollment_f_nral = EFNRALW, 
+      ) |> filter(
+        (EFALEVEL %in% c(2, 12)) | (LINE %in% c(1, 15))
+        # Per 2024 Data Dictionary, 
+        # - EFALEVEL 2 = undergrad 
+        # - EFALELVE 12 = grad
+        # - Line 1 = first year first time full-time undergrad
+        # - Line 15 = first year first time part-time undergrad
+      ) |> mutate(level = case_when(
+        EFALEVEL == 2 ~ "all undergrad", 
+        EFALEVEL == 12 ~ "all graduate",
+        LINE %in% c(1, 15) ~ "first year undergrad"
+      )
+      ) |>
+      select(institution_id = UNITID, 
+             year, 
+             level,
+             starts_with("enrollment_")) |>
+      group_by(institution_id, 
+               year, 
+               level) |>
+      summarize(across(starts_with("enrollment_"), sum), 
+                .groups = "drop")
+    
+  }) |> bind_rows()
+  
+  DESC_ALL <- map(YEARS, function(yy){
+    if(yy <= 2022){
+      hd_url <- glue("https://nces.ed.gov/ipeds/datacenter/data/HD{yy}.zip")
+      
+    } else {
+      hd_url <- glue("https://nces.ed.gov/ipeds/data-generator?year={yy}&tableName=HD{yy}&HasRV=0&type=csv")
+    }
+    
+    hd_file <- file.path(data_dir, glue("hd{yy}.csv.zip"))
+    
+    if(!file.exists(hd_file)){
+      message(glue("Downloading Institutional Descriptions for {yy} from {hd_url}"))
+      download.file(hd_url, destfile = hd_file, quiet=TRUE, mode="wb")    
+    }
+    
+    suppressWarnings(
+      read_csv(hd_file, 
+               show_col_types=FALSE, 
+               locale=locale(encoding=if_else(yy==2024, "utf-8", "windows-1252"))) |>
+        mutate(year = yy, 
+               INSTNM) |> 
+        select(institution_id = UNITID, 
+               institution_name = INSTNM, 
+               state = STABBR, 
+               year)
+    )
+    
+  }) |> bind_rows()
+  
+  inner_join(EFA_ALL, 
+             DESC_ALL, 
+             join_by(institution_id == institution_id, 
+                     year == year))
+}
+
+IPEDS <- acquire_ipeds_data()
+```
+
+```{r}
+IPEDS <- acquire_ipeds_data()
+print(IPEDS)
+
+IPEDS <- IPEDS |>
+  mutate(is_cuny = str_detect(institution_name, "CUNY"))
+
+IPEDS <- IPEDS |>
+  mutate(is_calpublic = str_detect(institution_name, "University of California System") | str_detect(institution_name, "California State System")) |>
+  group_by(is_calpublic) |>
+  summarize(n_calpublic = n())
+
+#install.packages("gt")
+
+library(gt)
+my_table <- IPEDS |> 
+  head() |> 
+  gt()
+
+library(tidyverse)
+IPEDS |> 
+  group_by(is_calpublic) |> 
+  summarize(n_calpublic = n()) |> 
+  gt() |>
+  tab_header(title="California Institutions", 
+             subtitle="The education is divided by Three Public Systems") |>
+  tab_source_note (md("The education in each state is different, and **California** has his own *system*. With this information, we have an idea which are
+                       the most popular educational *systems*, and it's domain. 
+                      This information can be verified in the following links:
+                       <https://en.wikipedia.org/wiki/1996_California_Proposition_209>. And information about the California public system:
+                       <https://en.wikipedia.org/wiki/University_of_California>, <https://en.wikipedia.org/wiki/California_State_University>, 
+                       <https://en.wikipedia.org/wiki/California_Community_Colleges>)"))
+```
+
+```{r}
+summary(IPEDS)
+
+install.packages("skimr")
+library(skimr)
+skim(IPEDS)
+
+library(scales)
+comma(12345.6789)
+dollar(12345.6789)
+comma(12345.6789, accuracy=0.01)
+percent(0.1234)
+percent(0.1234)
+percent(0.1234, accuracy=0.01)
+
+IPEDS |> 
+  distinct(institution_name) |>
+  summarize(n_institution_name = n())
+
+IPEDS |>
+  filter(str_detect(institution_name, "Baruch College"),
+         year == 2024,
+         level == "all graduate") |>
+  rowwise()
+  mutate(total_enrollment = mean(c_across(starts_with("enrollment_")), na.rm = TRUE)) |>
+  select(institution_name, total_grad)
+  
+IPEDS |>
+    filter(str_detect(institution_name, "Baruch College"),
+           year == 2024,
+           level== "first year undergrad") |> 
+  rowwise()
+    mutate(level_total = mean(c_across(starts_with("enrollment_")), na.rm = TRUE)) |>
+    summarize(grand_baruch = sum(level_total))  
+  
+  
+IPEDS <- IPEDS |>
+    filter(year == "nhpi") |>
+    group_by(institution_name) |>
+  arrange(desc(total_enrollment))
+
+IPEDS |>
+  filter(level == "all graduate") |>
+  mutate(total_grad = mean(c_across(starts_with("enrollment_")), na.rm = TRUE)) |>
+  group_by(state) |>
+  summarize(total_grad_state = sum(total_grad, na.rm = TRUE)) |>
+  arrange(desc(total_grad_state))
+
+```
+With all these information, we have many questions to answer to understand better what this means. 
+
+11,243 institutions were considered for this analysis, and taking **Baruch college** as our first example,it i good to answer the following questions:   
+
+- How many graduate students were enrolled at Baruch in 2024?
+- How many total students were enrolled in Baruch in 2024?
+- Which institution had the number of enrolled female students in 2019?
+- Which institution with over 1000 total students admitted the highest proportion of Native Hawaiian or Pacific islander *first year* undergraduates in 2024?
+
+Running the codes combinations I defined as the correct ones to get the answers, I couldn't got any additional result, except for the first question that shows the 11,243 institutions.I will continue working and analyzing my codes to correct the issue and be able to see the results
+
+::: {.callout-note title="AI Usage Statement" collapse="true"}
+
+Some websites were consulted to better understand which *Boolean logical operator* was better to use in one of the codes. For one of the questions, where it was needed to define a total of enrollments, I consulted Chatgpt on how to only consider the part of **enrollment_** of each column, without reading the people race indicated in the last part of the title. 
+
+:::

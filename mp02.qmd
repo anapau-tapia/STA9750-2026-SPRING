@@ -59,8 +59,10 @@ load_atus_data <- function(file_base = c("resp", "rost", "act")){
     file.copy(temp_file, file_name_out)
   }
   
-   file <- read_csv(file_name_out,
-                     show_col_types = FALSE)
+       file <- read_csv(file_name_out,
+                     show_col_types = FALSE,
+                     n_max=50000)
+
   
   res <- switch(file_base,
          resp = file |> 
@@ -69,7 +71,6 @@ load_atus_data <- function(file_base = c("resp", "rost", "act")){
                   survey_year = TUYEAR,
                   month = TUMONTH,
                   occ_code = TEIO1OCD,
-                  age = any_of(c("TEAGE", "teage")), 
                   hefaminc = any_of(c("HEFAMINC", "hefaminc"))) |>
            mutate(
             
@@ -276,7 +277,7 @@ df_joined |>
   fmt_number(columns = avg_min, decimals = 1) |>
   cols_label(employment_status = "Status", avg_min = "Avg. Minutes") |>
    tab_source_note(md(
-      "According to the results in the table, obtained by an ATUS survey, Unemployed people (Not in Labor Force) spend more time taking care of their lawn by 5.34%.than employed pleope. This could mean that unemployed peole have more free time to mown their lawn and take are of their plants. "))
+      "According to the results from the ATUS survey, individuals who are not in the labor force spend 5.34% more time on lawn care than those who are employed. This suggests that unemployed individuals may utilize their additional free time to mow their lawns and tend to their gardens. "))
 
 ```
 ### 5.2 social/recreational activities #
@@ -289,7 +290,7 @@ df_joined |>
   tab_header(title = "Time Spent on Social/Recreational activities 🧩 ") |>
   fmt_number(columns = avg_leisure_hrs, decimals = 2) |>
   tab_source_note(md(
-      "This table shows how many hours does people spent on social and recreational activities. Depending on thier marital status, people can spend more or less time on those activities. According to these data, Partnered people spend more time on recreational/social activites, followed by single people, and in last place, will be married people "))
+      "This table illustrates the amount of time people spend on social and recreational activities based on their marital status. According to the data, partnered individuals spend the most time on these activities, followed by single people. Married individuals spend the least amount of time on social and recreational activities compared to the other groups. "))
 
 ```
 
@@ -309,7 +310,29 @@ df_joined |>
       "With the data obtained from the ATUS survey, people declared that they mainly use the public transportation to go to work "))
 ```
 
+###5.5 
 
+
+###6.1 Household activities and age
+```{r}
+hh_age_data <- act |>
+    filter(level1_code == "020000") |>
+    # Use tulineno (lowercase) to identify the respondent
+    inner_join(rost |> filter(tulineno == 1), by = "participant_id") |>
+    inner_join(resp, by = "participant_id") |>
+    group_by(age) |>
+    summarize(avg_hh_time = weighted.mean(time_spent_min, survey_weight))
+
+ggplot(hh_age_data, aes(x = age, y = avg_hh_time)) +
+    geom_line(color = "steelblue") +
+    geom_smooth(method = "loess", color = "red", se = FALSE) +
+    labs(title = "Time Spent on Household Activities by Age",
+         x = "Age", y = "Average Minutes per Day") +
+    theme_minimal()
+
+```
+####
+In this graphic, we analyzed how much time Americans spend on household activities. According to the results, teenagers (under age 20) and people in their 50s and 60s spend less time on these tasks than other age groups. Interestingly, the end of the graph shows that people over 70 see a positive increase in time spent, making them the most active group in this category..####
 
 ### 6.2 Summer Education Employees #
 ```{r}
@@ -330,19 +353,154 @@ df_joined |>
   theme_minimal()
 
 ```
-### Education employees have the perk to enjoy their summer as any other student. From June to August, they have opportunity to do the activities they like the most. In this graph, we have the results of the ten most popular activities, and the minutes spent on each of them. Having sleeping as the number 1, with more than 225 minutes. Following by that, the three most popular activities are: attending or hosting social, events, attending sports and working, spending between 150 and 175 minutes. The last 6 activities are less common for eduactional employees, spending less than 150 minutes per day.  
+#### Education employees often enjoy the perk of having summers off, similar to students. From June to August, they have the opportunity to engage in their favorite leisure activities. This graph displays the ten most popular activities and the average minutes spent on each. Sleeping ranks as the number one activity, accounting for more than 225 minutes. Following that, the next three most popular activities—attending or hosting social events, attending sports, and working—occupy between 150 and 175 minutes. The remaining six activities are less common, with employees spending fewer than 150 minutes per day on them.####
 
+###6.3 Education Activities 
+```{R}
+student_study <- act |>
+    filter(level1_code == "060000") |>
+    inner_join(resp, by = "participant_id") |>
+    inner_join(rost |> filter(tulineno == 1), by = "participant_id") |>
+    filter(is_college_student == TRUE) |>
+    group_by(age) |>
+    summarize(avg_study = weighted.mean(time_spent_min, survey_weight))
 
+ggplot(student_study, aes(x = age, y = avg_study)) +
+    geom_point(alpha = 0.5) +
+    geom_smooth(method = "lm", color = "purple") +
+    labs(title = "Study Time vs. Age for Enrolled Students",
+         x = "Age", y = "Avg Minutes per Day") +
+    theme_minimal()
+
+```
+#### Based on the sample of students interviewed for this survey, it appears that older students spend more time on educational activities such as studying, doing homework, and attending class. The data suggests a positive correlation: as age increases, so does the time spent on education. However, this trend may be influenced by outliers in the 30–35 age group, where some individuals reported over 400 minutes of daily educational activity ####
+
+###6.4 Sport interests 
+```{r}
+
+library(ggbump)
+
+bump_data <- act |>
+    filter(level2_code == "130200") |>
+    inner_join(rost |> filter(tulineno == 1), by = "participant_id") |>
+    inner_join(resp, by = "participant_id") |>
+    mutate(age_bin = cut(age, breaks = seq(15, 85, by = 10))) |>
+    group_by(age_bin, level3_code) |>
+    summarize(mean_time = weighted.mean(time_spent_min, survey_weight), .groups = 'drop') |>
+    # --- ADD THE NAMES HERE ---
+    mutate(sport_name = case_when(
+        level3_code == "130203" ~ "Basketball",
+        level3_code == "130205" ~ "Billiards",
+        level3_code == "130206" ~ "Soccer",
+        level3_code == "130207" ~ "Bowling",
+        level3_code == "130213" ~ "Football",
+        level3_code == "130214" ~ "Golfing",
+        level3_code == "130216" ~ "Hockey",
+        level3_code == "130220" ~ "Roller Skating",
+        level3_code == "130221" ~ "Rugby",
+        level3_code == "130226" ~ "Vehicle Touring",
+        level3_code == "130227" ~ "Volleyball",
+        level3_code == "130230" ~ "Weightlifting",
+        level3_code == "130232" ~ "Wrestling",
+        level3_code == "130299" ~ "Attending Sporting Events",
+        TRUE ~ "Other Sport"
+    )) |>
+    group_by(age_bin) |>
+    mutate(rank = rank(desc(mean_time), ties.method = "random")) |>
+    filter(rank <= 5)
+
+ggplot(bump_data, aes(x = age_bin, y = rank, color = sport_name, group = sport_name)) +
+    geom_bump(linewidth = 1.5) +  
+    geom_point(size = 3) +
+    scale_y_reverse(breaks = 1:5) +
+    labs(title = "Sports Popularity Rank by Age Group", 
+         x = "Age Group", 
+         y = "Rank",
+         color = "Sport") + 
+    theme_minimal()
+
+```
+####This bump chart shows that the sports people like to go watch really change as they get older. For younger people (ages 15 to 35), watching football is usually the #1 thing to do. But once people hit middle age, they start getting into all kinds of different sports instead of just the main ones. # 
+
+###6.5 Time Spent per child
+```{r}
+Time_child_data <- act |>
+    filter(level1_code == "030000") |>
+    inner_join(resp, by = "participant_id") |>
+    filter(trchildnum > 0) |>
+    group_by(participant_id, trchildnum, survey_weight) |>
+    summarize(total_care = sum(time_spent_min), .groups = 'drop') |>
+    mutate(time_per_child = total_care / trchildnum) |>
+    group_by(trchildnum) |>
+    summarize(final_avg = weighted.mean(time_per_child, survey_weight))
+
+ggplot(Time_child_data, aes(x = factor(trchildnum), y = final_avg)) +
+    geom_col(fill = "coral") +
+    labs(title = "Care Time Per Individual Child", x = "Number of Children", y = "Minutes per Child") +
+    theme_minimal()
+
+```
+#### The histogram shows a clear negative trend. A single child receives the most one-on-one care time from their parents; however, as the number of children in a household increases, the care time per child decreases. As a result, a child in a family of seven receives less than 12 minutes of exclusive care, which is a huge contrast to the 80+ minutes spent on an only child ####   
 
 
 ## Final Insights and Deliverable
+```{r}
+library(gt)
 
-My miniproject was running well, until I change one code for task 6 and I started getting errors finding my "age" variable. So suddenly most of my codes for task 6 and 7 were showing 'error' results. I tried many different ways to add the variable, but I continued getting the same error " Column `age` is not found ". I skipped part of task 6 and task 7 to be able to render my work. I will continue working on fixing the error. 
+respondent_info <- resp |>
+    inner_join(rost |> 
+                   filter(tulineno == 1) |> 
+                   select(participant_id, age, sex), 
+               by = "participant_id")
+
+calc_market_stats <- function(df, label, target_offset = 30) {
+    df |>
+        group_by(participant_id, survey_weight) |>
+        summarize(total_time = sum(time_spent_min), .groups = 'drop') |>
+        summarize(
+            Demographic = label,
+            Low = quantile(total_time, 0.25),
+            Typical = median(total_time),
+            High = quantile(total_time, 0.75),
+            App_Target = Typical + target_offset
+        )
+}
+
+# Group 1: Stay-at-Home Dads
+sahd_stats <- act |>
+    filter(level1_code == "030000") |>
+    inner_join(respondent_info |>
+                   filter(sex == "M", trchildnum > 0, employment_status == "Not in Labor force"), 
+               by = "participant_id") |>
+    calc_market_stats("Stay-at-Home Dads")
+
+# Group 2: Undergrads 
+student_stats <- act |>
+    filter(level1_code == "060000") |>
+    inner_join(respondent_info |> filter(is_college_student == TRUE), by = "participant_id") |>
+    calc_market_stats("College Undergraduates")
+
+# Group 3: Remote Professionals
+remote_stats <- act |>
+    filter(level1_code == "050000", location == "Home") |>
+    inner_join(respondent_info |> filter(employment_status == "Employed"), by = "participant_id") |>
+    calc_market_stats("Remote Professionals")
+
+# Final Table
+bind_rows(sahd_stats, student_stats, remote_stats) |>
+    gt() |>
+    tab_header(title = "Market Research: Daily Time Use Targets 📟",
+               subtitle = "Figures in minutes per day") |>
+    fmt_number(columns = 2:5, decimals = 0) |>
+  tab_source_note(md(
+      "This table shows how much time three different groups of people—dads at home, college students, and remote workers—spend on their main daily tasks. We looked at the 'typical' amount of time they spend and then added 30 minutes to create an 'App Target.' This target is a goal for how much time we want people to spend using an app or doing an activity. It shows that you can't have the same goal for everyone, because a student's daily schedule looks totally different from a stay-at-home dad's schedule. "))
+
+```
 
 
 ::: {.callout-note title="AI Usage Statement" collapse="true"}
 
-Gemini was used to help write the code in this project, but all non-code text was generated without the use of any Generative AI tools. Additionally, ChatGPT was used to provide additional background information on the topic and to brainstorm ideas for the final open-ended prompt.
+Gemini was used to help write the code in this project, but all non-code text was generated without the use of any Generative AI tools. Additionally, Gemini was used to provide additional background information on the topic and to brainstorm ideas for the final open-ended prompt.
 
 :::
 
