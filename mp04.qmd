@@ -278,6 +278,8 @@ write_csv(olympedia_medals, "data/mp04/olympedia_medal_results.csv")
 
 ```
 
+###Report
+
 **Task 2**
 ```{r}
 library(tidyverse)
