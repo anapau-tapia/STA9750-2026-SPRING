@@ -277,6 +277,7 @@ write_csv(edition_disciplines, "data/mp04/olympedia_disciplines.csv")
 write_csv(olympedia_medals, "data/mp04/olympedia_medal_results.csv")
 
 ```
+:::
 
 ###Report
 
