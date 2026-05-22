@@ -1,5 +1,5 @@
 ---
-title: "Methane Emissions - Team Project"
+title: "Methane Emissions - Individual Report"
 author: "anapau-tapia"
 format: 
   html:
@@ -290,6 +290,7 @@ ggplot(comparison_data, aes(x = year, y = value, color = country)) +
 
 
 # 2.	Historical Context: Global Contribution 
+
 Our analysis indicates that Agriculture and Energy are the two dominant sectors responsible for the vast majority of domestic methane emissions. Together, these two sectors account for roughly **70%** of all anthropogenic methane in the United States. To clearly visualize their impact over time, the data was filtered to isolate these two categories and evaluate their long-term trajectories side by side.
 
 To isolate and evaluate the structural dynamics of the two primary contributors, a data transformation and visualization pipeline was constructed using the *tidyverse* and *ggplot2* frameworks.
