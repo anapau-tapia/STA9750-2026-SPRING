@@ -1,18 +1,31 @@
 ---
 title: "Methane Emissions - Team Project"
 author: "anapau-tapia"
+format: 
+  html:
+    echo: false
 ---
 
 ## Introduction 
-This project has been a roller coaster, since defying the topic, sources and all the questions. 
-Defying the scale of each individual question was something fun and stressful to do. While my teammates and I were working in getting the data and creating graphs to answer each question, we sometimes realized we were “crossing” to different topics or analyzing information of each other’s question. 
-My specific question was **How has live stock's share of U.S methane emissions changed overtime?** To solve this question, I use *Climate Watch* as my main resource. 
-First I needed to get access to the website information and then download it to my server to have it available in my computer and avoid continuously using the server benefit of downloading the information a 100 times.
-In the following code, I saved JSON responses to pull the data  
-started by identifying the Global methane emissions produced by the Unites States from 1990 to 2024, then I analyzed the main contributors of methane emissions, which are agriculture and energy to deep dive into the data from 2017-2024, and finally make a prediction of what would be the impact on CH4 emissions in the country if the US implement strongly the Paris agreement to reach the 1.5 C. 
+This project has been a true roller coaster, from defining the overall topic and data sources to shaping our specific analytical questions.
 
-## Data Acquisition   
+Defining the scale of each individual question was a challenge. While my teammates and I were busy acquiring data and building visualizations, we occasionally found ourselves crossing over into each other's territory or inadvertently analyzing another teammate's scope.
+
+My specific question was: **How has livestock's share of U.S. methane emissions changed over time?** To address this, I used *Climate Watch* as my primary resource. 
+To analyze the historical trajectory of U.S. **methane CH4** emissions by sector, we designed an automated data collection workflow to gather official statistics from Climate Watch and FAOSTAT.
+
+First, our code sets up a secure folder on our computer to act as a data storage hub. Instead of reaching out to the internet to download the file fresh every single time we run our analysis—which would slow us down and place unnecessary stress on the database servers—the script downloads the data once and saves it locally.
+
+Next, the code connects to the official *Climate Watch* web database and downloads the specific reference IDs for greenhouse gases and economic sectors. Here we needed all methane emissions CH4 in the United States from 1990 through 2024, broken down by every available sector, Grouping the data into clean 5-YEARS period, so we can more easily spot long-term historical shifts without getting distracted by minor year-to-year fluctuations.
+
+Finally, the script checks for our locally saved FAOSTAT livestock dataset, verifies that the file is safe and complete, and loads it into our workspace so we can blend the two sources together.
+
+## Data Acquisition  
+::: {.panel-tabset .nav-pills}
+
 ```{r}
+#| message: false
+#| warning: false
 
 # CLIMATE WATCH: 
 ### Historical U.S. Methane Emissions (1990–2024) 5-year grouped CH4 emissions by sector
@@ -39,10 +52,7 @@ save_json_response <- function(url, file_name) {
   out_path
 }
 
-# ----------------------------
 # 2) Pull metadata: data sources, gases, sectors
-#    (These endpoints are part of the Climate Watch API /api/v1 structure) [1](https://climatewatch-vizzuality.github.io/climate-watch/_docs/dev/API)
-# ----------------------------
 data_sources_file <- save_json_response(
   "https://www.climatewatchdata.org/api/v1/data/historical_emissions/data_sources",
   "climate_watch_data_sources.json"
@@ -70,10 +80,7 @@ gas_id <- 554          # CH4
 # Pull ALL sectors so bars can be color-coded by sector
 sector_ids <- sectors$id
 
-# ----------------------------
 # 4) Historical emissions request (ALL sectors, USA, 1990–2024)
-#    Parameters are passed as arrays using explode, matching your style. [1](https://climatewatch-vizzuality.github.io/climate-watch/_docs/dev/API)
-# ----------------------------
 historical_req <- request("https://www.climatewatchdata.org/api/v1/data/historical_emissions") |>
   req_url_query(
     `data_sources[]` = source_id,
@@ -93,15 +100,11 @@ historical_file <- file.path(
 historical_resp <- historical_req |> req_perform()
 writeBin(resp_body_raw(historical_resp), historical_file)
 
-# ----------------------------
 # 5) Load JSON -> data frame 
-# ----------------------------
 climate_watch_raw <- fromJSON(historical_file, flatten = TRUE)
 cw_df <- as_tibble(climate_watch_raw$data)
 
-# ----------------------------
 # 6) Unnest emissions
-# ----------------------------
 cw_long <- cw_df |>
   unnest(emissions)
 
@@ -126,9 +129,7 @@ cw_long <- cw_long |>
   ) |>
   filter(!is.na(year), !is.na(value))
 
-# ----------------------------
 # 7) Filter to CH4 + 5-year bins
-# ----------------------------
 cw_ch4 <- cw_long |>
   filter(gas == "CH4") |>
   filter(year >= 1990, year <= 2024) |>
@@ -142,6 +143,8 @@ cw_ch4 <- cw_long |>
 ```
 
 ```{r}
+#| message: false
+#| warning: false
 
 # Load the Data from my local computer - FAOSTAT 
 file_path <- file.path("data", "group_project", "faostat", "methane_us_1990plus.csv")
@@ -156,12 +159,13 @@ if(file.exists(file_path)) {
 # Map the loaded data to the object name used in your analysis script
 methane_us_1990plus <- methane_us
 
-
 ```
 
 ## DATA IMPLEMENTATION 
 ```{r}
 #Setting both sources in Kt units 
+#| message: false
+#| warning: false
 
 # 1) Prepare Climate Watch (Global Totals, and changing unit to kt)
 global_total <- cw_ch4 |>
@@ -184,7 +188,7 @@ share_analysis <- livestock_ch4 |>
 print(head(share_analysis))
 
 ```
-
+In this chunk I took the raw data, isolated the relevant sectors, rearranged the data structure, and calculated the exact historical percentage that agricultural emissions contribute to the United States' total methane footprint.
 
 ```{r}
 library(ggplot2)
@@ -220,76 +224,13 @@ cw_share <- cw_wide |>
 print("First few rows of calculated shares:")
 head(cw_share)
 ```
+:::
 
-#1.	Historical Context: Global Contribution 
-To follow up on the discussion about U.S. methane and its specific sources, here is a timeline of the most significant industrial agricultural events from **1990 to 2024**. This period reflects the U.S. footprint within the global climate landscape.
-Our analysis identifies that **Agriculture** and **Energy** are the two dominant activities responsible for the vast majority of U.S. methane. So here I filter those sectors to create a plot considering only those factors and see their impact. Together, these two sectors account for about **70%** of all anthropogenic methane in the U.S.
+# 1. Total Methane Emissions
+Beginning with the examination of the total volume of **methane CH4** emissions produced by the United States, this section establishes a historical baseline spanning 1990 to 2024, positioning domestic trends within the global climate landscape.
 
-```{r}
-#METHANE EMISSIONS - ENERGY VS. AGRICULTURE 
-
-# 1. Prepare the combined data
-combined_analysis <- cw_long |>
-  filter(gas == "CH4") |>
-  filter(sector %in% c("Agriculture", "Energy", "Total excluding LULUCF")) |>
-  group_by(year, sector) |>
-  summarise(total_val = sum(value, na.rm = TRUE), .groups = "drop") |>
-  # Pivot to get Total in its own column for the share calculation
-  pivot_wider(names_from = sector, values_from = total_val) |>
-  rename(Total_Methane = `Total excluding LULUCF`) |>
-  # Calculate shares for both
-  mutate(
-    Agriculture = (Agriculture / Total_Methane) * 100,
-    Energy = (Energy / Total_Methane) * 100
-  ) |>
-  # Pivot back to long format for easy plotting
-  pivot_longer(cols = c(Agriculture, Energy), 
-               names_to = "Sector", 
-               values_to = "Share")
-
-# 2. Create the combined plot
-ggplot(combined_analysis, aes(x = year, y = Share, color = Sector)) +
-  geom_line(size = 1.2) +
-  geom_point() +
-  scale_color_manual(values = c("Agriculture" = "#e74c3c", "Energy" = "#41B7C4")) +
-  scale_y_continuous(
-    labels = label_percent(scale = 1), 
-    limits = c(0, 100)
-  ) +
-  labs(
-    title = "Methane Emissions Share: Agriculture vs. Energy",
-    subtitle = "U.S. Historical Data (1990-2024)",
-    x = "Year",
-    y = "Share of Total Methane (%)",
-    caption = "Source: Climate Watch. Energy includes fugitive emissions (leaks)."
-  ) +
-  theme_minimal() +
-  theme(legend.position = "bottom")
-```
-
-1990s: The Dawn of Precision & GMOs
-•	1990 – Food, Agriculture, Conservation, and Trade Act (1990 Farm Bill): Established the first federal standards for organic food and increased focus on soil conservation.
-•	1993: EPA Natural Gas STAR Program – The U.S. EPA launched this voluntary partnership with oil and gas companies to encourage the adoption of cost-effective leak detection technologies.
-•	1996: Landfill Methane Rules – The U.S. implemented the first major federal regulations requiring large landfills to capture and flare methane, leading to significant long-term reductions in the waste sector.
-•	1996 – The GMO Revolution: The first large-scale commercial planting of genetically modified crops (like Roundup Ready soybeans) began. This shifted the industry toward monoculture and large-scale industrial spraying.
-2000s: Consolidation & Biofuels
-•	2002 – Farm Security and Rural Investment Act: Significantly increased subsidies for large-scale commodity crops (corn, soy), further encouraging the "industrial" model of farming.
-•	2005 – Energy Policy Act: Created the Renewable Fuel Standard (RFS), mandating that billions of gallons of corn-based ethanol be blended into U.S. gasoline. This caused a massive expansion of industrial corn acreage.
-•	2008 – Peak Industrial Concentration: This decade saw massive consolidation, with a few firms controlling the majority of the global seed and chemical markets.
-2010s: The Methane & Tech Boom
-•	2012: The Shale Revolution Peak – The massive expansion of hydraulic fracturing (fracking) in the U.S. led to a surge in natural gas production. While gas replaced coal (lowering CO2), it caused a spike in methane leakage from infrastructure.
-•	2015 – EPA Methane Reporting: The EPA began stricter Subpart W reporting, requiring large-scale facilities to report greenhouse gas emissions, though agriculture remained largely exempt from the toughest limits, because in 2014, Satellite observations reveal that methane leaks from oils and gas were most higher than industry reports had suggested. In 2016, this EPA initiative pushed companies to make specific, transparent commitments to reduce leaks across their entire operations.
-•	2018 – Precision Ag Connectivity Act: Focused on bringing high-speed internet to rural areas to support the "Internet of Things" (sensors on cows, soil, and tractors) to manage methane and waste in real-time.
-2020–2024: Climate Mandates & The "Super Pollutant" Push
-•	2020 – The Pandemic Shift: Supply chain disruptions led to a temporary drop in industrial output, but highlighted the vulnerability of centralized "factory farm" models.
-•	2021 – U.S. Methane Emissions Action Plan: The Biden-Harris administration launched a comprehensive plan to slash methane emissions. For agriculture, this focused on "Climate-Smart" practices and voluntary incentives for manure digesters.
-•	2021: The Global Methane Pledge (GMP) – Launched at COP26 by the U.S. and EU, over 150 countries have now joined, committing to a collective 30% reduction in methane emissions by 2030.
-•	2022 – Inflation Reduction Act (IRA): Provided nearly $20 billion for "Climate-Smart Agriculture," the largest investment in conservation since the Dust Bowl. Much of this is aimed at reducing methane from livestock.
-•	2022: U.S. Inflation Reduction Act (IRA) – This landmark law introduced the first-ever federal "Methane Waste Emissions Charge," effectively taxing oil and gas companies for excessive methane leaks
-•	2024 – National Strategy for Reducing Food Loss and Waste: A first-of-its-kind strategy to cut food waste in half, which directly targets methane leaking from landfills (the Waste sector in your Big Four).
-2024: EPA Final Methane Rule & Super Emitter Program – The EPA finalized strict new standards requiring the phase-out of routine flaring and the use of satellite/third-party data to identify "super-emitting" leaks in real-time.
-
-
+The following visualization illustrates total domestic methane emissions across all reporting sectors: *Agriculture, Energy, Industrial Processes, Waste, and Land Use, Land-Use Change, and Forestry (LULUCF)*. 
+Historically, this collective footprint peaked at more than 875 Mt CO2e
 
 ```{r}
 library(stringr)
@@ -346,16 +287,106 @@ ggplot(comparison_data, aes(x = year, y = value, color = country)) +
   theme(legend.position = "none") 
 
 ```
-# 2.	U.S Total Methane Emissions Trend (2017-2024)
-
-Then, my intention here was to zoomed in in the last years of our data, to see the change of the methane emissions, after the US started implementing more initiatives to fight the GHG emissions. 
-To do so, I kept the same information as in the image 1, and highlight the *Action Plan Period* in 2020, that’s when the world started taking more serious actions and implementing more initiatives to reduce GHG emissions  
-This marks the introduction of intensified federal monitoring and the precursors to the U.S. Methane Emissions Action Plan.
-The launch of the inttiatives  since 2015 with the Paris agreement and in 2020 with the U.S. Methane Emissions Action Plan (and subsequent 2021 updates) provided a framework for reducing "super-pollutants."
-Since 2020, we observe a stabilization and a gradual downward trend in specific sub-sectors. By targeting high-impact areas—such as capping orphaned oil and gas wells and implementing climate-smart agricultural practices—the total methane volume has begun to decouple from industrial growth
-Additionally, I lean on website to investigate more about the historical events in Agriculture that directly or indirectly, have lead us to the issue we have till today  with the emissions of Methane gas and the also have pushed many country to take actions about it: 
 
 
+# 2.	Historical Context: Global Contribution 
+Our analysis indicates that Agriculture and Energy are the two dominant sectors responsible for the vast majority of domestic methane emissions. Together, these two sectors account for roughly **70%** of all anthropogenic methane in the United States. To clearly visualize their impact over time, the data was filtered to isolate these two categories and evaluate their long-term trajectories side by side.
+
+To isolate and evaluate the structural dynamics of the two primary contributors, a data transformation and visualization pipeline was constructed using the *tidyverse* and *ggplot2* frameworks.
+
+As shown in this graphic, a clear divergence has emerged between the two sectors over the last decade.The energy sector's share (plotted in blue) displays an upward trend, a shift heavily influenced by technological expansion and increasing industrial automation. In contrast, the agricultural sector's relative contribution (plotted in red) has steadily declined, reflecting the initial impacts of targeted domestic and international climate frameworks adopted by the United States.
+To provide deeper context, the following timeline highlights the most relevant historical events that have affected U.S. methane emissions over the years.
+```{r}
+#| message: false
+#| warning: false
+
+#METHANE EMISSIONS - ENERGY VS. AGRICULTURE 
+
+# 1. Prepare the combined data
+combined_analysis <- cw_long |>
+  filter(gas == "CH4") |>
+  filter(sector %in% c("Agriculture", "Energy", "Total excluding LULUCF")) |>
+  group_by(year, sector) |>
+  summarise(total_val = sum(value, na.rm = TRUE), .groups = "drop") |>
+  # Pivot to get Total in its own column for the share calculation
+  pivot_wider(names_from = sector, values_from = total_val) |>
+  rename(Total_Methane = `Total excluding LULUCF`) |>
+  # Calculate shares for both
+  mutate(
+    Agriculture = (Agriculture / Total_Methane) * 100,
+    Energy = (Energy / Total_Methane) * 100
+  ) |>
+  # Pivot back to long format for easy plotting
+  pivot_longer(cols = c(Agriculture, Energy), 
+               names_to = "Sector", 
+               values_to = "Share")
+
+# 2. Create the combined plot
+ggplot(combined_analysis, aes(x = year, y = Share, color = Sector)) +
+  geom_line(size = 1.2) +
+  geom_point() +
+  scale_color_manual(values = c("Agriculture" = "#e74c3c", "Energy" = "#41B7C4")) +
+  scale_y_continuous(
+    labels = label_percent(scale = 1), 
+    limits = c(0, 100)
+  ) +
+  labs(
+    title = "Methane Emissions Share: Agriculture vs. Energy",
+    subtitle = "U.S. Historical Data (1990-2024)",
+    x = "Year",
+    y = "Share of Total Methane (%)",
+    caption = "Source: Climate Watch. Energy includes fugitive emissions (leaks)."
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+**Timeline**
+
+*1990s: The Dawn of Precision & GMOs*
+- **1990:** Food, Agriculture, Conservation, and Trade Act (1990 Farm Bill): Established the first federal standards for organic food and increased focus on soil conservation.
+
+- **1993:** EPA Natural Gas STAR Program: The U.S. EPA launched a voluntary partnership with oil and gas companies to encourage the adoption of cost-effective leak detection technologies.
+
+- **1996:** Landfill Methane Rules: The U.S. implemented the first major federal regulations requiring large landfills to capture and flare methane, leading to significant long-term reductions in the waste sector.
+
+- **1996:** The GMO Revolution: The first large-scale commercial planting of genetically modified crops began. This shifted the industry toward monoculture and large-scale industrial spraying.
+
+**2000s: Consolidation & Biofuels**
+- **2002:** Farm Security and Rural Investment Act: Significantly increased subsidies for large-scale commodity crops (corn, soy), further encouraging the "industrial" model of farming.
+
+- **2005:** Energy Policy Act: Created the Renewable Fuel Standard (RFS), mandating that billions of gallons of corn-based ethanol be blended into U.S. gasoline. This caused a massive expansion of industrial corn acreage.
+
+- **2008:** Peak Industrial Concentration: This decade saw massive consolidation, with a few firms controlling the majority of the global seed and chemical markets.
+
+**2010s: The Methane & Tech Boom**
+- **2012:** The Shale Revolution Peak: The massive expansion of hydraulic fracturing (fracking) in the U.S. led to a surge in natural gas production. While gas replaced coal (lowering CO2), it caused a spike in methane leakage from infrastructure.
+
+- **2015:** EPA Methane Reporting: The EPA began stricter Subpart W reporting, requiring large-scale facilities to report greenhouse gas emissions, though agriculture remained largely exempt from the toughest limits, because in 2014, Satellite observations reveal that methane leaks from oils and gas were most higher than industry reports had suggested. In 2016, this EPA initiative pushed companies to make specific, transparent commitments to reduce leaks across their entire operations.
+
+- **2018:** Precision Ag Connectivity Act: Focused on bringing high-speed internet to rural areas to support the "Internet of Things" (sensors on cows, soil, and tractors) to manage methane and waste in real-time.
+
+**2020–2024: Climate Mandates & The "Super Pollutant" Push**
+- **2020:** The Pandemic Shift: Supply chain disruptions led to a temporary drop in industrial output, but highlighted the vulnerability of centralized "factory farm" models.
+
+- **2021:** U.S. Methane Emissions Action Plan: The Biden-Harris administration launched a comprehensive plan to slash methane emissions. For agriculture, this focused on *"Climate-Smart"* practices and voluntary incentives for manure digesters.
+
+- **2021:** The Global Methane Pledge (GMP): Launched at COP26 by the U.S. and EU, over 150 countries have now joined, committing to a collective 30% reduction in methane emissions by 2030.
+
+- **2022:** U.S. Inflation Reduction Act (IRA):  This landmark law introduced the first-ever federal *"Methane Waste Emissions Charge,"* effectively taxing oil and gas companies for excessive methane leaks. It also provided nearly $20 billion for *"Climate-Smart Agriculture,"* the largest investment in conservation since the Dust Bowl. Much of this is aimed at reducing methane from livestock.
+
+- **2024:** National Strategy for Reducing Food Loss and Waste: A first-of-its-kind strategy to cut food waste in half, which directly targets methane leaking from landfills.
+
+- **2024:** EPA Final Methane Rule & Super Emitter Program: The EPA finalized strict new standards requiring the phase-out of routine flaring and the use of satellite/third-party data to identify "super-emitting" leaks in real-time.
+
+
+
+# 3.	U.S Total Methane Emissions Trend (2017-2024)
+
+To better understand how recent climate policies have impacted our atmosphere, this section zooms in on the final years of our dataset; doing this by isolating methane observations for the United States *"iso_code3=="USA"* under the full baseline sector *"Total including LULUCF"* subsetting the window strictly to the years 2017 through 2024. 
+
+While maintaining the core data categories from the previous chart, this graphic highlights the year *2020*. This period represents a global turning point when the United States and the international community began implementing stricter initiatives to fight greenhouse gas emissions, introducing intensified federal monitoring and laying the groundwork for the U.S. Methane Emissions Action Plan. To highlight this year, a vertical dash line was added with a *geom_vline* that intersects the x-axis at the exact launch point of the policy window (2020) to ground the visual narrative.
+
+The structural trajectory of these initiatives—beginning with the Paris Agreement framework in 2015 and accelerating through the U.S. Methane Emissions Action Plan in 2020 (alongside subsequent 2021 regulatory updates)—established a formal baseline for mitigating "super-pollutants." Post-2020, the data reveals stabilization and a gradual downward trend across specific sub-sectors.Thanks to targeted efforts—such as sealing abandoned oil and gas wells and introducing climate-smart farming techniques—total methane emissions have finally begun to drop even as industrial activity continues.
 
 ```{r}
 # 1. Data Preparation (2017-2024)
@@ -402,29 +433,99 @@ ggplot(report_data_zoomed, aes(x = date_obj, y = value)) +
   )
 
 ```
-# 3.	Methane Emissions prediction
-uses data from the Global Change Assessment Model (GCAM) to simulate how different political and economic choices will alter the trajectory of this specific greenhouse gas.
-The sharp divergence between the top blue line and the bottom lines illustrates the massive impact that policy intervention has on methane emissions. Because methane is a highly potent but short-lived climate pollutant, the graphic demonstrates that "Increased Ambition" policies can successfully force a dramatic, immediate downward shift in the U.S. emissions trajectory.
+# 4.	Methane Emissions prediction
+To explore where current greenhouse gas trends might lead us over the next two decades, an statistical forecasting model was created, using standard linear regression *y = beta0 + beta1 x + E* and the *tidyverse* framework, to project methane emissions up to the year 2045.
+
+The code implements this by analyzing the past behavior of both United States and global emissions. Using this statistical technique, the program calculates the historical "speed and direction" of CH4 emissions with 95% prediction interval.The combined timeline is mapped via *ggplot2* and separated using *facet_wrap (country, scales = "free_y")* to handle the varying volumetric baselines between domestic and global outputs. Uncertainty boundaries of where emissions are reasonably likely to land if historical conditions continue, are rendered using a transparent *geom_ribbon()* restricted strictly to the projected segment.
+
+Our forecasting models show that even with current environmental initiatives in place, the United States faces three potential futures:
+1- *Business-As-Usual Baseline:* If we continue on our current path without shifting strategies, the long-term emissions trajectory will continue their upward trend over the 20-year horizon.
+
+2- *Upper-Bound Risk Scenario:* The upper limit of the prediction interval simulates a pathway where existing emission mitigation strategies are not completely followed or un-enforced. Under these conditions, domestic methane volumes are projected to increase dramatically, with level never before recorded of 1000 Megatones.
+
+3- *Accelerated Mitigation Pathway:* Conversely, if the United States strictly enforces climate initiatives and takes decisive action to curb these pollutants, the trajectory successfully shifts downward, demonstrating a meaningful commitment to global environmental sustainability.
 
 ```{r}
+# 20-Year Methane Emissions Projection (Up to 2045)
 
+# Create a clean historical dataframe for modeling
+historical_df <- comparison_data |>
+  select(country, year, value) |>
+  filter(!is.na(value))
 
-```
+# Function to fit model and predict next 20 years per country
+predict_future_emissions <- function(df, years_ahead = 20) {
+  max_year <- max(df$year, na.rm = TRUE)
+  future_years <- data.frame(year = (max_year + 1):(max_year + years_ahead))
+  
+  # Group by country to make independent predictions
+  df |>
+    group_by(country) |>
+    do({
+      model <- lm(value ~ year, data = .)
+      
+      # Predict future values
+      preds <- predict(model, newdata = future_years, interval = "prediction")
+      
+      # Combine future years with predictions
+      cbind(future_years, preds)
+    }) |>
+    ungroup() |>
+    rename(value = fit, lower_ci = lwr, upper_ci = upr) |>
+    mutate(data_type = "Projected")
+}
 
-# 4.	Global Warming : an outcome of Global emissions: 
-Here I created a graphic of the temperature increase 
+# Generate projections
+projections <- predict_future_emissions(historical_df, years_ahead = 20)
 
-The chart vividly demonstrates the delayed but massive impact of current policy decisions. While all four lines look identical up until about 2020, the choices made in the near term cause the pathways to radically diverge over the next several decades—showing that aggressive intervention ("Increased Ambition") is essential to preventing the steepest temperature spikes.
-```{r}
+# Tag historical data so we can combine them cleanly
+historical_df <- historical_df |>
+  mutate(
+    data_type = "Historical",
+    lower_ci = value,
+    upper_ci = value
+  )
+
+# Combine historical and projected data
+full_timeline <- bind_rows(historical_df, projections)
+
+# Visualize Historical Data + 20-Year Projections
+
+ggplot(full_timeline, aes(x = year, y = value, color = country)) +
+  # Confidence intervals for projections
+  geom_ribbon(data = filter(full_timeline, data_type == "Projected"),
+              aes(ymin = lower_ci, ymax = upper_ci, fill = country), 
+              alpha = 0.15, color = NA) +
+  # Line plot differentiating historical and projection styles
+  geom_line(aes(linetype = data_type), size = 1.2) +
+  facet_wrap(~country, scales = "free_y") + 
+  scale_color_manual(values = c("United States" = "#e74c3c", "World" = "#2c3e50")) +
+  scale_fill_manual(values = c("United States" = "#e74c3c", "World" = "#2c3e50")) +
+  scale_linetype_manual(values = c("Historical" = "solid", "Projected" = "dashed")) +
+  labs(
+    title = "U.S. & Global Methane Emissions: 20-Year Projection",
+    subtitle = "Units: Megatonnes (Mt CO2e) | Dashed lines indicate linear projections with 95% prediction intervals",
+    x = "Year", 
+    y = "Emissions Volume",
+    linetype = "Data Type"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    strip.text = element_text(face = "bold", size = 12)
+  )
 
 ```
 
 
 # Conclusion
-While the U.S. has historically been a significant global producer of methane, the concentrated focus on Agriculture and Energy post-2020 demonstrates that targeted policy can effectively bend the emissions curve.
-In the U.S., this period is defined by a massive shift toward precision agriculture and a growing conflict between increasing industrial productivity and the need for methane regulation.
-But the deeper insight from this project is that technological fixes alone cannot solve a problem rooted in production scale and consumption patterns. Industrial agriculture has expanded because of economic incentives, infrastructure, and demand—not because it is environmentally sustainable. As your document notes, “The solution is not a ‘better’ manure lagoon – it’s about adopting a path forward that solves for both the methane and animal rights crisis.”
+While the United States has historically been a major global source of methane, the intense focus on the *Agriculture* and *Energy* sectors since 2020 proves that targeted policies can successfully bend the emissions curve downward. In the U.S., this era is defined by a massive shift toward precision farming alongside a growing conflict between increasing industrial output and the urgent need for methane regulation.
 
+Today, however, the future outlook is clouded by changing government regulations and recent decisions to withdraw from key climate agreements. When policies prioritize factory economies and industrial growth over environmental safety—allowing industries to dispose of their waste without accounting for long-term ecological damage—it becomes difficult to predict what the future holds for the United States and the rest of the world.
+
+One of the most profound takeaways from this project is that technological fixes alone cannot solve an environmental problem rooted deeply in our scale of production and consumption habits. Industrial agriculture has expanded rapidly because of economic incentives, infrastructure, and consumer demand—not because it is sustainable. As established throughout this report: “The solution is not a ‘better’ manure lagoon – it’s about adopting a path forward that solves for both the methane and animal rights crisis.”
+
+To arrive at a more certain conclusion about where we stand today, we must observe how these emerging national decisions play out in the coming years while waiting for more recent data to be officially released and integrated into our models.
 
 
 ::: {.callout-note title="AI Usage Statement" collapse="true"}
@@ -436,8 +537,6 @@ ChatGPT was used as a support tool to help write the code in this project, but a
 
 ------------------------------------------------------------------------
 
-This work ©2025 by anapau-tapia was initially prepared as a Mini-Project for
+This work ©2025 by anapau-tapia was initially prepared as a course-project for
 STA 9750 at Baruch College. More details about this course can be found at
-[the course site](https://michael-weylandt.com/STA9750) and instructions for
-this assignment can be found at 
-
+[the course site](https://michael-weylandt.com/STA9750)
